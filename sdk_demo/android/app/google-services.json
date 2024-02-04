@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "983823372361",
+    "project_id": "backend-login-8b331",
+    "storage_bucket": "backend-login-8b331.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983823372361:android:18c74fd14c5f13e8326f98",
+        "android_client_info": {
+          "package_name": "com.example.sdk_demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB030cIvoZdX6pmBI8kSStqQhgY-aUiS84"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
