@@ -89,7 +89,6 @@ class UnifiedAuthService {
       DataSnapshot snapshot = await dbRef.get();
 
       if (snapshot.exists) {
-        // Assuming the structure is exactly as shown, with deviceToken directly under the UID.
         final data = snapshot.value as Map<dynamic, dynamic>?;
         if (data != null && data.containsKey('deviceToken')) {
           final String? deviceToken = data['deviceToken'];

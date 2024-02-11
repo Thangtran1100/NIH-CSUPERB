@@ -114,7 +114,7 @@ final String instanceId = "602b018a-1a3b-4026-8698-1d5746902ae6";
 
       if (response.statusCode == 200) {
         var user = json.decode(response.body);
-        return user; // Assuming the response is a JSON object representing the user
+        return user;
       } else {
         throw Exception('Failed to get user profile: ${response.statusCode}');
       }

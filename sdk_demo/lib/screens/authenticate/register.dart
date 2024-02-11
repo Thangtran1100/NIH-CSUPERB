@@ -88,7 +88,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
     },
                   child: Text('Register'),
                 ),
-                SizedBox(height: 20), // Add some space between buttons
+                SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
                     widget.toggleView();

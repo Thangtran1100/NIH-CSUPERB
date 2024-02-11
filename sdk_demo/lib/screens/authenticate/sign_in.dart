@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sdk_demo/models/user.dart';
 import 'package:sdk_demo/screens/home/home.dart';
-import 'package:sdk_demo/services/UnifiedAuthService.dart'; // Ensure this points to your updated AuthService
+import 'package:sdk_demo/services/UnifiedAuthService.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
@@ -17,7 +17,7 @@ class _SignInState extends State<SignIn> {
   final UnifiedAuthService _auth = UnifiedAuthService();
   final _formKey = GlobalKey<FormState>();
 
-  String email = ''; // Changed email to email
+  String email = '';
   String password = '';
   String error = '';
   bool isLoading = false;
@@ -26,7 +26,7 @@ class _SignInState extends State<SignIn> {
     if (_formKey.currentState!.validate()) {
       try {
         setState(() => isLoading = true);
-        AppUser? user = await _auth.signInWithEmailAndPassword(email, password); // Changed to use signInWithUsernameAndPassword
+        AppUser? user = await _auth.signInWithEmailAndPassword(email, password); 
 
         if (!mounted) return;
 
@@ -120,9 +120,9 @@ class _SignInState extends State<SignIn> {
                       child: const Text('Sign in'),
                       onPressed: _signIn,
                     ),
-                    ElevatedButton( // Added a new button for password reset
+                    ElevatedButton( 
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[300], // Change color as needed
+                        backgroundColor: Colors.grey[300],
                         padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                         textStyle: const TextStyle(fontSize: 18),
                       ),
