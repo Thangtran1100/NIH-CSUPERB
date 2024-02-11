@@ -1,110 +1,143 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:sdk_demo/services/auth.dart';
+import 'package:sdk_demo/models/user.dart';
+import 'package:sdk_demo/screens/home/home.dart';
+import 'package:sdk_demo/services/UnifiedAuthService.dart'; // Ensure this points to your updated AuthService
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
 
-  const SignIn({super.key, required this.toggleView});
+  const SignIn({Key? key, required this.toggleView}) : super(key: key);
 
   @override
   State<SignIn> createState() => _SignInState();
 }
 
 class _SignInState extends State<SignIn> {
-  final AuthService _auth = AuthService();
+  final UnifiedAuthService _auth = UnifiedAuthService();
   final _formKey = GlobalKey<FormState>();
 
-  String email = '';
+  String email = ''; // Changed email to email
   String password = '';
   String error = '';
+  bool isLoading = false;
+
+  void _signIn() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        setState(() => isLoading = true);
+        AppUser? user = await _auth.signInWithEmailAndPassword(email, password); // Changed to use signInWithUsernameAndPassword
+
+        if (!mounted) return;
+
+        if (user != null) {
+          String? deviceToken = await _auth.getDeviceTokenForUser(user.uid);
+
+          if (!mounted) return;
+
+          if (deviceToken != null) {
+            await _auth.login(deviceToken);
+
+            if (!mounted) return;
+
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Home()));
+
+            // Stop loading
+            setState(() => isLoading = false);
+          } else {
+            throw Exception('Device token could not be retrieved.');
+          }
+        } else {
+          throw Exception('Failed to sign in. Please check your email and password.');
+        }
+      } catch (e) {
+        setState(() {
+          error = e.toString();
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  // Function to handle password reset
+  void _resetPassword() async {
+    if (email.isNotEmpty) {
+      try {
+        await _auth.resetPassword(email);
+        // Display a success message or navigate to a confirmation screen
+        print('Password reset email sent to $email');
+      } catch (e) {
+        print('Failed to reset password: $e');
+        // Handle the error appropriately, such as displaying an error message
+      }
+    } else {
+      setState(() {
+        error = 'Please enter your email to reset the password.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.blue[800],
-        elevation: 0.0,
-        title: const Text('Sign In', style: TextStyle(color: Colors.white)),
+        title: const Text('Sign In'),
         actions: <Widget>[
           TextButton.icon(
             icon: const Icon(Icons.person, color: Colors.white),
             label: const Text('Register', style: TextStyle(color: Colors.white)),
-            onPressed: () async {
-              widget.toggleView();
-            },
-          )
+            onPressed: () => widget.toggleView(),
+          ),
         ],
       ),
-      body: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              const SizedBox(height: 20.0),
-              TextFormField(
-                decoration: InputDecoration(
-                  hintText: 'Email',
-                  fillColor: Colors.grey[200],
-                  filled: true,
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white, width: 2.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue[800]!, width: 2.0),
-                  ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Container(
+              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      decoration: const InputDecoration(hintText: 'Email'),
+                      validator: (val) => val!.isEmpty ? 'Enter a email' : null,
+                      onChanged: (val) => setState(() => email = val),
+                    ),
+                    const SizedBox(height: 20.0),
+                    TextFormField(
+                      obscureText: true,
+                      decoration: const InputDecoration(hintText: 'Password'),
+                      validator: (val) => val!.isEmpty ? 'Enter a password' : null,
+                      onChanged: (val) => setState(() => password = val),
+                    ),
+                    const SizedBox(height: 20.0),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[800],
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        textStyle: const TextStyle(fontSize: 18),
+                      ),
+                      child: const Text('Sign in'),
+                      onPressed: _signIn,
+                    ),
+                    ElevatedButton( // Added a new button for password reset
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[300], // Change color as needed
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        textStyle: const TextStyle(fontSize: 18),
+                      ),
+                      child: const Text('Forgot Password?'),
+                      onPressed: _resetPassword,
+                    ),
+                    const SizedBox(height: 12.0),
+                    Text(
+                      error,
+                      style: const TextStyle(color: Colors.red, fontSize: 14.0),
+                    ),
+                  ],
                 ),
-                validator: (val) => val?.isEmpty ?? true ? 'Enter an email' : null,
-                onChanged: (val) {
-                  setState(() => email = val);
-                },
               ),
-              const SizedBox(height: 20.0),
-              TextFormField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: 'Password',
-                  fillColor: Colors.grey[200],
-                  filled: true,
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white, width: 2.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue[800]!, width: 2.0),
-                  ),
-                ),
-                validator: (val) => val != null && val.length < 6 ? 'Your password is too short' : null,
-                onChanged: (val) {
-                  setState(() => password = val);
-                },
-              ),
-              const SizedBox(height: 20.0),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[800],
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
-                child: const Text('Sign in'),
-                onPressed: () async {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    dynamic result = await _auth.signInWithEmailAndPassword(email, password);
-                    if (result == null) {
-                      setState(() => error = 'Could not sign in with provided credentials');
-                    }
-                  }
-                },
-              ),
-              const SizedBox(height: 12.0),
-              Text(
-                error,
-                style: const TextStyle(color: Colors.red, fontSize: 14.0),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

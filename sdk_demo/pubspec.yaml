@@ -43,6 +43,7 @@ dependencies:
   telematics_sdk:
     path: package/telematics_sdk
   firebase_database: ^10.4.0
+  bcrypt: ^1.1.3
 
 dev_dependencies:
   flutter_test:

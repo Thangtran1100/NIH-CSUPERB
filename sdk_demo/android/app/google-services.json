@@ -1,13 +1,14 @@
 {
   "project_info": {
-    "project_number": "983823372361",
-    "project_id": "backend-login-8b331",
-    "storage_bucket": "backend-login-8b331.appspot.com"
+    "project_number": "1087866779795",
+    "firebase_url": "https://telematics-sample-cd2af-default-rtdb.firebaseio.com",
+    "project_id": "telematics-sample-cd2af",
+    "storage_bucket": "telematics-sample-cd2af.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:983823372361:android:18c74fd14c5f13e8326f98",
+        "mobilesdk_app_id": "1:1087866779795:android:8f81bce241d4c66a05b566",
         "android_client_info": {
           "package_name": "com.example.sdk_demo"
         }
@@ -15,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB030cIvoZdX6pmBI8kSStqQhgY-aUiS84"
+          "current_key": "AIzaSyAk9910ZhjWPYEzRZbfqiy7brmhVjN0_QU"
         }
       ],
       "services": {

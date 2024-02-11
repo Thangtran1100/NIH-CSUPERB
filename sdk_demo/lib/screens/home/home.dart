@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sdk_demo/services/auth.dart'; // Replace with the correct import path
 import 'Drives.dart'; // Replace with the correct import path
 import 'Profile.dart'; // Replace with the correct import path
-import 'signup.dart'; // Replace with the correct import path
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -18,8 +17,7 @@ class _HomeState extends State<Home> {
   final List<Widget> _pages = [
     const Text('Home Page'), // Your Home page content
     DrivesPage(),            // Drives page
-    ProfilePage(),           // Profile page (for login)
-    RegistrationForm(),      // Registration form
+    ProfilePage()            // Profile page (for login)
   ];
 
   @override
@@ -64,10 +62,6 @@ class _HomeState extends State<Home> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Register',
           ),
         ],
       ),

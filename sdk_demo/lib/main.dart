@@ -13,10 +13,10 @@ void main() async {
   Platform.isAndroid
       ? await Firebase.initializeApp(
           options: const FirebaseOptions(
-              apiKey: 'AIzaSyB030cIvoZdX6pmBI8kSStqQhgY-aUiS84',
-              appId: '1:983823372361:android:18c74fd14c5f13e8326f98',
-              messagingSenderId: '983823372361',
-              projectId: 'backend-login-8b331'))
+              apiKey: 'AIzaSyAk9910ZhjWPYEzRZbfqiy7brmhVjN0_QU',
+              appId: '1:1087866779795:android:8f81bce241d4c66a05b566',
+              messagingSenderId: '1087866779795',
+              projectId: 'telematics-sample-cd2af'))
       : await Firebase.initializeApp();
   runApp(const MyApp());
 
