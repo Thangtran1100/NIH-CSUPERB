@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sdk_demo/services/auth.dart'; // Replace with the correct import path
-import 'Drives.dart'; // Replace with the correct import path
-import 'Profile.dart'; // Replace with the correct import path
+import 'package:sdk_demo/services/auth.dart';
+import 'Drives.dart'; 
+import 'Profile.dart'; 
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,9 +15,9 @@ class _HomeState extends State<Home> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const Text('Home Page'), // Your Home page content
-    DrivesPage(),            // Drives page
-    ProfilePage()            // Profile page (for login)
+    const Text('Home Page'), 
+    DrivesPage(),            
+    ProfilePage()            
   ];
 
   @override

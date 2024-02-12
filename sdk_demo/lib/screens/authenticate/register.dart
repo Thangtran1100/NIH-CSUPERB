@@ -10,7 +10,7 @@ final Function toggleView;
 }
 
 class _RegistrationFormState extends State<RegistrationForm> {
-  final UnifiedAuthService _auth = UnifiedAuthService(); // Use UnifiedAuthService
+  final UnifiedAuthService _auth = UnifiedAuthService();
   final _formKey = GlobalKey<FormState>();
 
   // Add fields for telematics registration

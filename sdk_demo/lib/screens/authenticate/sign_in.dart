@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sdk_demo/models/user.dart';
 import 'package:sdk_demo/screens/home/home.dart';
@@ -16,6 +15,8 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final UnifiedAuthService _auth = UnifiedAuthService();
   final _formKey = GlobalKey<FormState>();
+
+  
 
   String email = '';
   String password = '';

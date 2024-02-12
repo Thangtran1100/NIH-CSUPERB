@@ -320,10 +320,11 @@ packages:
   telematics_sdk:
     dependency: "direct main"
     description:
-      path: "package/telematics_sdk"
-      relative: true
-    source: path
-    version: "0.0.1"
+      name: telematics_sdk
+      sha256: "3ad6e1164f597978d3db0adfeb0160c14abbcb87a520b7268e3043c85160f636"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   term_glyph:
     dependency: transitive
     description:

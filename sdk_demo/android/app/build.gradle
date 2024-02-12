@@ -73,4 +73,6 @@ flutter {
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
     implementation "com.telematicssdk:auth:1.1.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version" 
+    implementation "com.telematicssdk:tracking:2.2.257"
 }

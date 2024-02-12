@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sdk_demo/services/telematics_service.dart'; // Ensure this is the correct path
+import 'package:sdk_demo/services/telematics_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);

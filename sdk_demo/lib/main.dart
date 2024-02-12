@@ -6,7 +6,6 @@ import 'package:sdk_demo/screens/wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:sdk_demo/services/auth.dart';
 import 'package:provider/provider.dart';
-import 'package:sdk_demo/services/telematics_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

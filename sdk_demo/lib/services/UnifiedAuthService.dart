@@ -1,16 +1,19 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:bcrypt/bcrypt.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sdk_demo/models/user.dart';
 import 'package:sdk_demo/services/telematics_service.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:telematics_sdk/telematics_sdk.dart';
 
 class UnifiedAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TelematicsService _telematicsService = TelematicsService();
   final FirebaseDatabase _database = FirebaseDatabase.instance;
+
+  final TrackingApi _trackingApi = TrackingApi();
 
   final String instanceId = "602b018a-1a3b-4026-8698-1d5746902ae6";
   final String instanceKey = "8adc6dd8-e8c9-4576-b731-37ca92d5669f";
@@ -22,46 +25,45 @@ class UnifiedAuthService {
 
   // Register with email, password, and user details for telematics
   Future<AppUser?> registerUser({
-  required String email,
-  required String password,
-  required String firstName,
-  required String lastName,
-  required String phone,
-  required String clientId,
-}) async {
-  try {
-    // Firebase Authentication to create user
-    UserCredential result = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    User? firebaseUser = result.user;
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String phone,
+    required String clientId,
+  }) async {
+    try {
+      // Firebase Authentication to create user
+      UserCredential result = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      User? firebaseUser = result.user;
 
-    // Register user in telematics system
-    TokenResponse tokenResponse = await _telematicsService.registerUser(
-      firstName: firstName,
-      lastName: lastName,
-      phone: phone,
-      email: email,
-      clientId: clientId,
-    );
+      // Register user in telematics system
+      TokenResponse tokenResponse = await _telematicsService.registerUser(
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+        email: email,
+        clientId: clientId,
+      );
 
-    // Store telematics tokens and username in Firebase database linked to the user's UID
-    if (firebaseUser != null) {
-      await _database.ref('userTokens/${firebaseUser.uid}').set({
-        'deviceToken': tokenResponse.deviceToken,
-        'accessToken': tokenResponse.accessToken,
-        'refreshToken': tokenResponse.refreshToken,
-      });
+      // Store telematics tokens and username in Firebase database linked to the user's UID
+      if (firebaseUser != null) {
+        await _database.ref('userTokens/${firebaseUser.uid}').set({
+          'deviceToken': tokenResponse.deviceToken,
+          'accessToken': tokenResponse.accessToken,
+          'refreshToken': tokenResponse.refreshToken,
+        });
+      }
+
+      return _userFromFirebaseUser(firebaseUser);
+    } catch (e) {
+      print(e.toString());
+      return null;
     }
-
-    return _userFromFirebaseUser(firebaseUser);
-  } catch (e) {
-    print(e.toString());
-    return null;
   }
-}
-
 
   Future<AppUser?> signInWithEmailAndPassword(
       String email, String password) async {
@@ -75,7 +77,6 @@ class UnifiedAuthService {
       return null;
     }
   }
-
 
   Future<String?> getDeviceTokenForUser(String? uid) async {
     if (uid == null) {
@@ -94,6 +95,7 @@ class UnifiedAuthService {
           final String? deviceToken = data['deviceToken'];
           print("Device token for UID $uid is: $deviceToken");
           login(deviceToken);
+          initializeAndStartTracking(deviceToken!);
           return deviceToken;
         } else {
           print("Device token not found for UID $uid.");
@@ -140,12 +142,48 @@ class UnifiedAuthService {
   }
 
   Future<void> resetPassword(String email) async {
-  try {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-    print("Password reset email sent to $email");
-  } catch (e) {
-    print("Failed to send password reset email: $e");
-    // Handle the error appropriately
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      print("Password reset email sent to $email");
+    } catch (e) {
+      print("Failed to send password reset email: $e");
+      // Handle the error appropriately
+    }
   }
-}
+
+  // Method to initialize and start tracking with the given device token
+  Future<void> initializeAndStartTracking(String deviceToken) async {
+    try {
+      // Initialize the SDK with the device token
+      await _trackingApi.setDeviceID(deviceId: deviceToken);
+
+      // Show the permission wizard and request necessary permissions
+      _trackingApi.showPermissionWizard(
+        enableAggressivePermissionsWizard: true,
+        enableAggressivePermissionsWizardPage: true,
+      );
+
+      // Listener for permission wizard result
+      final permissionWizardResult = await _trackingApi.onPermissionWizardClose.first;
+      if (permissionWizardResult == PermissionWizardResult.allGranted) {
+        // Check if SDK is enabled and enable it if not
+        final isSdkEnabled = await _trackingApi.isSdkEnabled() ?? false;
+        if (!isSdkEnabled) {
+          await _trackingApi.setEnableSdk(enable: true);
+        }
+
+        // Start tracking
+        final isTracking = await _trackingApi.isTracking() ?? false;
+        if (!isTracking) {
+          await _trackingApi.startTracking();
+        }
+
+        print("SDK Enabled and Tracking Started");
+      } else {
+        print("Permissions not fully granted. SDK not enabled and tracking not started.");
+      }
+    } catch (e) {
+      print("Error initializing and starting tracking: $e");
+    }
+  }
 }
