@@ -43,6 +43,9 @@ dependencies:
   firebase_database: ^10.4.0
   bcrypt: ^1.1.3
   telematics_sdk: ^0.1.1
+  flutter_launcher_icons: ^0.13.1
+  intl: ^0.19.0
+  logging: ^1.2.0
 
 dev_dependencies:
   flutter_test:
@@ -59,6 +62,12 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+
 flutter:
 
   # The following line ensures that the Material Icons font is

@@ -11,8 +11,8 @@ class TokenResponse {
 }
 
 class TelematicsService {
-final String instanceId = "602b018a-1a3b-4026-8698-1d5746902ae6";
-    final String instanceKey = "8adc6dd8-e8c9-4576-b731-37ca92d5669f";
+final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
+    final String instanceKey = "0ec87b0e-5eb2-4e79-a439-3e16aa36104c";
 
   Future<TokenResponse> registerUser({
     required String firstName,
@@ -100,7 +100,7 @@ final String instanceId = "602b018a-1a3b-4026-8698-1d5746902ae6";
     required String accessToken,
   }) async {
     var url = Uri.parse(
-        'https://user.telematicssdk.com/v1/path-to-user-profile-endpoint'); // Replace with actual endpoint URL
+        'https://user.telematicssdk.com/v1/path-to-user-profile-endpoint');
     var headers = {
       'accept': 'application/json',
       'InstanceId': instanceId,

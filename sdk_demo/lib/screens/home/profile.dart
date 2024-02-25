@@ -1,32 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:sdk_demo/services/telematics_service.dart';
+import 'package:sdk_demo/services/UnifiedAuthService.dart';
+import 'package:sdk_demo/models/user.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
-
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final _formKey = GlobalKey<FormState>();
-  String deviceToken = '';
+  final UnifiedAuthService _authService = UnifiedAuthService();
+  String _dailyStatistics = 'Loading...';
 
-  void _login() async {
-    final TelematicsService _loginService = TelematicsService();
+  @override
+  void initState() {
+    super.initState();
+    _fetchAndDisplayStatistics();
+  }
 
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      try {
-        await _loginService.loginWithDeviceToken(deviceToken);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login successful!')),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: $e')),
-        );
+  Future<void> _fetchAndDisplayStatistics() async {
+    try {
+      AppUser? currentUser = _authService.getCurrentAppUser();
+      if (currentUser != null) {
+        String? accessToken =
+            await _authService.getAccessTokenForUser(currentUser.uid);
+        if (accessToken != null) {
+          String startDate = "2024-01-01";
+          String endDate = "2024-02-24";
+
+          String statistics = await _authService.fetchDailyStatistics(
+              startDate, endDate, accessToken);
+          setState(() {
+            _dailyStatistics = statistics;
+          });
+        } else {
+          setState(() {
+            _dailyStatistics = 'Failed to get access token for user.';
+          });
+        }
       }
+    } catch (e) {
+      setState(() {
+        _dailyStatistics = 'Error fetching statistics: $e';
+      });
     }
   }
 
@@ -34,27 +49,10 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text('Profile'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Device Token'),
-                onSaved: (value) => deviceToken = value!,
-                validator: (value) => value!.isEmpty ? 'Enter Device Token' : null,
-              ),
-              ElevatedButton(
-                onPressed: _login,
-                child: const Text('Login'),
-              ),
-            ],
-          ),
-        ),
+      body: Center(
+        child: Text(_dailyStatistics),
       ),
     );
   }

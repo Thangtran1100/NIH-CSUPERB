@@ -15,8 +15,8 @@ class UnifiedAuthService {
 
   final TrackingApi _trackingApi = TrackingApi();
 
-  final String instanceId = "602b018a-1a3b-4026-8698-1d5746902ae6";
-  final String instanceKey = "8adc6dd8-e8c9-4576-b731-37ca92d5669f";
+  final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
+  final String instanceKey = "0ec87b0e-5eb2-4e79-a439-3e16aa36104c";
 
   // Converts Firebase User to custom AppUser
   AppUser? _userFromFirebaseUser(User? user) {
@@ -78,6 +78,14 @@ class UnifiedAuthService {
     }
   }
 
+  User? getCurrentUser() {
+    return _auth.currentUser;
+  }
+
+  AppUser? getCurrentAppUser() {
+    return _userFromFirebaseUser(_auth.currentUser);
+  }
+
   Future<String?> getDeviceTokenForUser(String? uid) async {
     if (uid == null) {
       print("UID is null. Cannot retrieve device token.");
@@ -111,25 +119,25 @@ class UnifiedAuthService {
     return null;
   }
 
-  Future<void> login(String? userId) async {
+  Future<void> login(String? deviceToken) async {
     var url = Uri.parse('https://user.telematicssdk.com/v1/Auth/Login');
 
     var headers = {
       'accept': 'application/json',
-      'InstanceId': '602b018a-1a3b-4026-8698-1d5746902ae6',
+      'InstanceId': instanceId,
       'content-type': 'application/json',
     };
 
     var body = jsonEncode({
-      'LoginFields': {"Devicetoken": userId},
-      'Password': '8adc6dd8-e8c9-4576-b731-37ca92d5669f'
+      'LoginFields': {"Devicetoken": deviceToken},
+      'Password': instanceKey
     });
 
     var response = await http.post(url, headers: headers, body: body);
 
     if (response.statusCode == 200) {
       // If server returns an OK response, parse the JSON.
-      print('Response data: ${response.body}');
+      print('Login Successful');
     } else {
       // If the server did not return a 200 OK response,
       print(
@@ -137,8 +145,37 @@ class UnifiedAuthService {
       throw Exception(
           'Failed to load data, status code: ${response.statusCode}');
     }
+  }
 
-    print("Login here");
+  Future<String?> getAccessTokenForUser(String? uid) async {
+    if (uid == null) {
+      print("UID is null. Cannot retrieve access token.");
+      return null;
+    }
+
+    DatabaseReference dbRef = FirebaseDatabase.instance.ref('userTokens/$uid');
+
+    try {
+      DataSnapshot snapshot = await dbRef.get();
+
+      if (snapshot.exists) {
+        final data = snapshot.value as Map<dynamic, dynamic>?;
+        if (data != null && data.containsKey('accessToken')) {
+          final String? accessToken = data['accessToken'];
+          print("Access token for UID $uid is: $accessToken");
+          return accessToken;
+        } else {
+          print("Access token not found for UID $uid.");
+        }
+      } else {
+        print("Snapshot does not exist for UID $uid.");
+      }
+    } catch (e) {
+      print(
+          "An error occurred while trying to fetch access token for UID $uid: $e");
+    }
+
+    return null;
   }
 
   Future<void> resetPassword(String email) async {
@@ -164,7 +201,8 @@ class UnifiedAuthService {
       );
 
       // Listener for permission wizard result
-      final permissionWizardResult = await _trackingApi.onPermissionWizardClose.first;
+      final permissionWizardResult =
+          await _trackingApi.onPermissionWizardClose.first;
       if (permissionWizardResult == PermissionWizardResult.allGranted) {
         // Check if SDK is enabled and enable it if not
         final isSdkEnabled = await _trackingApi.isSdkEnabled() ?? false;
@@ -180,10 +218,46 @@ class UnifiedAuthService {
 
         print("SDK Enabled and Tracking Started");
       } else {
-        print("Permissions not fully granted. SDK not enabled and tracking not started.");
+        print(
+            "Permissions not fully granted. SDK not enabled and tracking not started.");
       }
     } catch (e) {
       print("Error initializing and starting tracking: $e");
     }
+  }
+
+  // Method to fetch daily statistics from the Telematics API
+  Future<String> fetchDailyStatistics(
+      String startDate, String endDate, String authToken) async {
+    var client = http.Client();
+    String statistics = '';
+    try {
+      var url = Uri.parse(
+              'https://api.telematicssdk.com/indicators/v2/Statistics/daily')
+          .replace(queryParameters: {
+        'StartDate': startDate,
+        'EndDate': endDate,
+      });
+
+      final response = await client.get(
+        url,
+        headers: {
+          'accept': 'application/json',
+          'authorization': 'Bearer $authToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        statistics = response.body;
+      } else {
+        print(
+            'Failed to fetch daily statistics, status code: ${response.statusCode}, response: ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching daily statistics: $e');
+    } finally {
+      client.close();
+    }
+    return statistics;
   }
 }

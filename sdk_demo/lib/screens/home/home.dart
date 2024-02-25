@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sdk_demo/screens/home/profile.dart';
 import 'package:sdk_demo/services/auth.dart';
-import 'Drives.dart'; 
-import 'Profile.dart'; 
+import 'Drives.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -17,7 +17,7 @@ class _HomeState extends State<Home> {
   final List<Widget> _pages = [
     const Text('Home Page'), 
     DrivesPage(),            
-    ProfilePage()            
+    ProfilePage(),               
   ];
 
   @override
@@ -34,7 +34,11 @@ class _HomeState extends State<Home> {
             label: const Text('Logout'),
             onPressed: () async {
               await _auth.signedOut();
-            }
+            },
+            style: ElevatedButton.styleFrom(
+              primary: Colors.blue[400], 
+              onPrimary: Colors.white,
+            ),
           ),
         ],
       ),
@@ -48,7 +52,7 @@ class _HomeState extends State<Home> {
             _currentIndex = index;
           });
         },
-        selectedItemColor: Colors.grey,
+        selectedItemColor: Colors.blue[400],
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(

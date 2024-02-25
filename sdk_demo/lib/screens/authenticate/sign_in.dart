@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sdk_demo/models/user.dart';
-import 'package:sdk_demo/screens/home/home.dart';
 import 'package:sdk_demo/services/UnifiedAuthService.dart';
 
 class SignIn extends StatefulWidget {
@@ -16,8 +15,6 @@ class _SignInState extends State<SignIn> {
   final UnifiedAuthService _auth = UnifiedAuthService();
   final _formKey = GlobalKey<FormState>();
 
-  
-
   String email = '';
   String password = '';
   String error = '';
@@ -27,7 +24,7 @@ class _SignInState extends State<SignIn> {
     if (_formKey.currentState!.validate()) {
       try {
         setState(() => isLoading = true);
-        AppUser? user = await _auth.signInWithEmailAndPassword(email, password); 
+        AppUser? user = await _auth.signInWithEmailAndPassword(email, password);
 
         if (!mounted) return;
 
@@ -41,7 +38,7 @@ class _SignInState extends State<SignIn> {
 
             if (!mounted) return;
 
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Home()));
+            _showSDKEnabledDialog();
 
             // Stop loading
             setState(() => isLoading = false);
@@ -49,7 +46,8 @@ class _SignInState extends State<SignIn> {
             throw Exception('Device token could not be retrieved.');
           }
         } else {
-          throw Exception('Failed to sign in. Please check your email and password.');
+          throw Exception(
+              'Failed to sign in. Please check your email and password.');
         }
       } catch (e) {
         setState(() {
@@ -60,16 +58,34 @@ class _SignInState extends State<SignIn> {
     }
   }
 
+  void _showSDKEnabledDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('SDK Enabled'),
+          content: Text('The SDK has been enabled and tracking has started.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // Function to handle password reset
   void _resetPassword() async {
     if (email.isNotEmpty) {
       try {
         await _auth.resetPassword(email);
-        // Display a success message or navigate to a confirmation screen
         print('Password reset email sent to $email');
       } catch (e) {
         print('Failed to reset password: $e');
-        // Handle the error appropriately, such as displaying an error message
       }
     } else {
       setState(() {
@@ -86,7 +102,8 @@ class _SignInState extends State<SignIn> {
         actions: <Widget>[
           TextButton.icon(
             icon: const Icon(Icons.person, color: Colors.white),
-            label: const Text('Register', style: TextStyle(color: Colors.white)),
+            label:
+                const Text('Register', style: TextStyle(color: Colors.white)),
             onPressed: () => widget.toggleView(),
           ),
         ],
@@ -94,7 +111,8 @@ class _SignInState extends State<SignIn> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Container(
-              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -108,23 +126,26 @@ class _SignInState extends State<SignIn> {
                     TextFormField(
                       obscureText: true,
                       decoration: const InputDecoration(hintText: 'Password'),
-                      validator: (val) => val!.isEmpty ? 'Enter a password' : null,
+                      validator: (val) =>
+                          val!.isEmpty ? 'Enter a password' : null,
                       onChanged: (val) => setState(() => password = val),
                     ),
                     const SizedBox(height: 20.0),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue[800],
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 15),
                         textStyle: const TextStyle(fontSize: 18),
                       ),
                       child: const Text('Sign in'),
                       onPressed: _signIn,
                     ),
-                    ElevatedButton( 
+                    ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[300],
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 15),
                         textStyle: const TextStyle(fontSize: 18),
                       ),
                       child: const Text('Forgot Password?'),
