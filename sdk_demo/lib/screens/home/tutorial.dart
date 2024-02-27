@@ -10,62 +10,69 @@ class TutorialHome<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  String? get barrierLabel => 'Home Page Tutorial';
+  String? get barrierLabel => 'Home Page';
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 0);
-
   @override
   Widget buildPage(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation) {
-    return Center(
-      // Provide DefaultTextStyle to ensure that the dialog's text style
-      // matches the rest of the text in the app.
-      child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.bodyMedium!,
-        // UnconstrainedBox is used to make the dialog size itself
-        // to fit to the size of the content.
-        child: UnconstrainedBox(
+    return Align(
+      alignment: Alignment.center,
+      child: AspectRatio(
+        aspectRatio: 1 / 1.1,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
           child: Container(
-            padding: const EdgeInsets.all(20.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: Colors.white,
             ),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  'Tutorial',
-                  style: Theme.of(context).textTheme.headlineSmall,
+            child: DefaultTextStyle(
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+              ),
+              textAlign: TextAlign.center,
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Text(
+                      'Tutorial - Home Page',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const Text(
+                      "Tap this icon at the bottom left corner "
+                      "to navigate to the Home Page",
+                    ),
+                    const Icon(
+                      Icons.home,
+                      size: 60,
+                    ),
+                    const Text(
+                      'where you can view the app\'s tracking status',
+                    ),
+                    TextButton(
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.arrow_forward,
+                          ),
+                          Text(
+                            "Next",
+                          ),
+                        ],
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(TutorialInfo());
+                      },
+                    ),
+                  ],
                 ),
-                Text(
-                  'Home Page',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Here you can view the application\'s tracking status',
-                ),
-                const SizedBox(height: 10),
-                const SizedBox(
-                  width: 200,
-                  child: Text(
-                    "Tap this icon at the bottom left "
-                    "to navigate to the Home Page",
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const Icon(
-                  Icons.home,
-                  size: 50,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward),
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(TutorialInfo());
-                  },
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -84,7 +91,7 @@ class TutorialInfo<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  String? get barrierLabel => 'Tutorial and Request Data';
+  String? get barrierLabel => 'Revisit Tutorial';
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 0);
@@ -92,67 +99,83 @@ class TutorialInfo<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation) {
-    return Center(
-      // Provide DefaultTextStyle to ensure that the dialog's text style
-      // matches the rest of the text in the app.
-      child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.bodyMedium!,
-        // UnconstrainedBox is used to make the dialog size itself
-        // to fit to the size of the content.
-        child: UnconstrainedBox(
+    return Align(
+      alignment: Alignment.center,
+      child: AspectRatio(
+        aspectRatio: 1 / 1.1,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
           child: Container(
-            padding: const EdgeInsets.all(20.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: Colors.white,
             ),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  'Tutorial',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                Text(
-                  'Tutorial and Requesting Data',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Here you can review the Tutorial or\n'
-                  'Request your tracking data',
-                ),
-                const SizedBox(height: 10),
-                const SizedBox(
-                  width: 200,
-                  child: Text(
-                    'Tap this icon at the top right '
-                    'to navigate to the selection menu',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const Icon(
-                  Icons.info_outlined,
-                  size: 50,
-                ),
-                Row(
-                  children: [
-                    TextButton.icon(
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text("Previous"),
-                      onPressed: () {
-                        Navigator.pushReplacement(context, TutorialHome());
-                      },
+            child: DefaultTextStyle(
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+              ),
+              textAlign: TextAlign.center,
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Text(
+                      'Tutorial - Home Page',
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    TextButton.icon(
-                      icon: const Icon(Icons.arrow_forward),
-                      label: const Text("Next"),
-                      onPressed: () {
-                        Navigator.pushReplacement(context, TutorialProfile());
-                      },
+                    const Text(
+                      "Tap this icon at the top right corner of the home page "
+                      "to navigate to this tutorial",
+                    ),
+                    const Icon(
+                      Icons.info_outline,
+                      size: 60,
+                    ),
+                    const Text(
+                      "where you can review app functionalities",
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_back,
+                              ),
+                              Text(
+                                "Previous",
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pushReplacement(TutorialHome());
+                          },
+                        ),
+                        TextButton(
+                          child: const Row(
+                            children: [
+                              Text(
+                                "Next",
+                              ),
+                              Icon(
+                                Icons.arrow_forward,
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pushReplacement(TutorialSettings());
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -161,7 +184,7 @@ class TutorialInfo<T> extends PopupRoute<T> {
   }
 }
 
-class TutorialProfile<T> extends PopupRoute<T> {
+class TutorialSettings<T> extends PopupRoute<T> {
   @override
   Color? get barrierColor => Colors.black.withAlpha(0x50);
 
@@ -171,7 +194,7 @@ class TutorialProfile<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  String? get barrierLabel => 'View your credentials';
+  String? get barrierLabel => 'Application and Account Info';
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 0);
@@ -179,71 +202,84 @@ class TutorialProfile<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation) {
-    return Center(
-      // Provide DefaultTextStyle to ensure that the dialog's text style
-      // matches the rest of the text in the app.
-      child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.bodyMedium!,
-        // UnconstrainedBox is used to make the dialog size itself
-        // to fit to the size of the content.
-        child: UnconstrainedBox(
+    return Align(
+      alignment: Alignment.center,
+      child: AspectRatio(
+        aspectRatio: 1 / 1.1,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
           child: Container(
-            padding: const EdgeInsets.all(20.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: Colors.white,
             ),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  'Tutorial',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                Text(
-                  'Profile Page',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Here you can view and modify your account information',
-                ),
-                const SizedBox(height: 10),
-                const Column(
-                  children: [
-                    SizedBox(
-                      width: 250,
-                      child: Text(
-                        "Tap this icon at the bottom right "
-                        "to navigate to the Profile Page",
-                        textAlign: TextAlign.center,
-                      ),
+            child: DefaultTextStyle(
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+              ),
+              textAlign: TextAlign.center,
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Text(
+                      'Tutorial - Settings Page',
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    Icon(
-                      Icons.person_rounded,
-                      size: 50,
+                    const Text(
+                      "Tap this icon at the bottom right corner "
+                      "to navigate to the Settings Page",
+                    ),
+                    const Icon(
+                      Icons.settings_outlined,
+                      size: 60,
+                    ),
+                    const Text(
+                      "where you can edit your profile, request your data,"
+                      " and view app info",
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_back,
+                              ),
+                              Text(
+                                "Previous",
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pushReplacement(TutorialInfo());
+                          },
+                        ),
+                        TextButton(
+                          child: const Row(
+                            children: [
+                              Text(
+                                "Next",
+                              ),
+                              Icon(
+                                Icons.arrow_forward,
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pushReplacement(TutorialEditProfile());
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    TextButton.icon(
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text("Previous"),
-                      onPressed: () {
-                        Navigator.pushReplacement(context, TutorialInfo());
-                      },
-                    ),
-                    TextButton.icon(
-                      icon: const Icon(Icons.arrow_forward),
-                      label: const Text("Next"),
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                            context, TutorialCredentials());
-                      },
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -252,7 +288,7 @@ class TutorialProfile<T> extends PopupRoute<T> {
   }
 }
 
-class TutorialCredentials<T> extends PopupRoute<T> {
+class TutorialEditProfile<T> extends PopupRoute<T> {
   @override
   Color? get barrierColor => Colors.black.withAlpha(0x50);
 
@@ -270,74 +306,199 @@ class TutorialCredentials<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation) {
-    return Center(
-      // Provide DefaultTextStyle to ensure that the dialog's text style
-      // matches the rest of the text in the app.
-      child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.bodyMedium!,
-        // UnconstrainedBox is used to make the dialog size itself
-        // to fit to the size of the content.
-        child: UnconstrainedBox(
+    return Align(
+      alignment: Alignment.center,
+      child: AspectRatio(
+        aspectRatio: 1 / 1.1,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
           child: Container(
-            padding: const EdgeInsets.all(20.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: Colors.white,
             ),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  'Tutorial',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                Text(
-                  'Profile Page'
-                  '\nManage Credentials',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Here you can modify your account credentials',
-                ),
-                const SizedBox(height: 10),
-                Column(
-                  children: [
-                    const SizedBox(
-                      width: 250,
-                      child: Text(
-                        "Tap this button in the Profile Page to change your "
-                        "E-mail, password, or physician",
-                        textAlign: TextAlign.center,
-                      ),
+            child: DefaultTextStyle(
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+              ),
+              textAlign: TextAlign.center,
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Text(
+                      'Tutorial - Settings Page',
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    TextButton.icon(
-                      onPressed: null,
-                      icon: Icon(Icons.lock_person_rounded),
-                      label:
-                          Text(textAlign: TextAlign.left, 'Manage Credentials'),
-                    )
+                    const Text(
+                      "Tap this icon in the settings page "
+                      "to navigate to your profile",
+                    ),
+                    const Icon(
+                      Icons.person_outline_rounded,
+                      size: 60,
+                    ),
+                    const Text(
+                      'where you can view and manage your credentials ',
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_back,
+                              ),
+                              Text(
+                                "Previous",
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pushReplacement(TutorialSettings());
+                          },
+                        ),
+                        TextButton(
+                          child: const Row(
+                            children: [
+                              Text(
+                                "Next",
+                              ),
+                              Icon(
+                                Icons.arrow_forward,
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pushReplacement(TutorialRequestData());
+                          },
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-                Row(
-                  children: [
-                    TextButton.icon(
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text("Previous"),
-                      onPressed: () {
-                        Navigator.pushReplacement(context, TutorialProfile());
-                      },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TutorialRequestData<T> extends PopupRoute<T> {
+  @override
+  Color? get barrierColor => Colors.black.withAlpha(0x50);
+
+  // This allows the popup to be dismissed by tapping the scrim or by pressing
+  // the escape key on the keyboard.
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  String? get barrierLabel => 'Settings';
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 0);
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    return Align(
+      alignment: Alignment.center,
+      child: AspectRatio(
+        aspectRatio: 1 / 1.1,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
+            ),
+            child: DefaultTextStyle(
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+              ),
+              textAlign: TextAlign.center,
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Text(
+                      'Tutorial - Settings Page',
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    TextButton.icon(
-                      label: const Text("Done"),
-                      icon: const Icon(Icons.arrow_forward),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
+                    const Text(
+                      "Tap this icon in the settings page "
+                      "to navigate a form",
+                    ),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.drive_file_move_rtl,
+                          size: 60,
+                        ),
+                        Icon(
+                          Icons.file_copy,
+                          size: 60,
+                        ),
+                        Icon(
+                          Icons.file_present,
+                          size: 60,
+                        ),
+                      ],
+                    ),
+                    const Text(
+                      'where you can request your collected'
+                      ' raw drive data',
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_back,
+                              ),
+                              Text(
+                                "Previous",
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pushReplacement(TutorialEditProfile());
+                          },
+                        ),
+                        TextButton(
+                          child: const Row(
+                            children: [
+                              Text(
+                                "Done",
+                              ),
+                              Icon(
+                                Icons.arrow_forward,
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
