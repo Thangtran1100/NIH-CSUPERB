@@ -17,9 +17,7 @@ final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
   Future<TokenResponse> registerUser({
     required String firstName,
     required String lastName,
-    required String phone,
     required String email,
-    required String clientId,
   }) async {
     
     const String url = "https://user.telematicssdk.com/v1/Registration/create";
@@ -27,9 +25,7 @@ final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
     var body = jsonEncode({
       "FirstName": firstName,
       "LastName": lastName,
-      "Phone": phone,
       "Email": email,
-      "UserFields": {"ClientId": clientId},
     });
     try {
       var response = await http.post(
@@ -91,35 +87,6 @@ final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
       // Handle error or invalid response
       print("Login failed: ${response.body}");
       throw Exception('Failed to login with device token: ${response.statusCode}');
-    }
-  }
-
-  Future<Map<String, dynamic>> getUserProfile({
-    required String instanceId,
-    required String instanceKey,
-    required String accessToken,
-  }) async {
-    var url = Uri.parse(
-        'https://user.telematicssdk.com/v1/path-to-user-profile-endpoint');
-    var headers = {
-      'accept': 'application/json',
-      'InstanceId': instanceId,
-      'InstanceKey': instanceKey,
-      'Authorization': 'Bearer $accessToken',
-      'content-type': 'application/json',
-    };
-
-    try {
-      var response = await http.get(url, headers: headers);
-
-      if (response.statusCode == 200) {
-        var user = json.decode(response.body);
-        return user;
-      } else {
-        throw Exception('Failed to get user profile: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Exception occurred: $e');
     }
   }
 }

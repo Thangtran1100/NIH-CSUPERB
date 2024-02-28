@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,14 +24,56 @@ class UnifiedAuthService {
     return user != null ? AppUser(uid: user.uid) : null;
   }
 
+  // auth change user stream
+  Stream<AppUser?> get user {
+    return _auth.authStateChanges().map(_userFromFirebaseUser);
+  }
+
+  // sign-in anonymous
+  Future signInAnon() async {
+    try {
+      UserCredential userCredential = await _auth.signInAnonymously();
+      User? user = userCredential.user;
+      return _userFromFirebaseUser(user!);
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  // register with email & password
+  Future registerWithEmailAndPassword(String email, String password) async {
+    try {
+      UserCredential result = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      User? user = result.user;
+      return _userFromFirebaseUser(user);
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  // sign-out
+  Future signedOut() async {
+    try {
+      print('User Signed Out');
+      return await _auth.signOut();
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
   // Register with email, password, and user details for telematics
-  Future<AppUser?> registerUser({
+  Future<AppUser?> registerPatient({
     required String email,
     required String password,
     required String firstName,
     required String lastName,
-    required String phone,
-    required String clientId,
+    required String gender,
+    required String birthday,
+    required String physicianName
   }) async {
     try {
       // Firebase Authentication to create user
@@ -44,20 +87,63 @@ class UnifiedAuthService {
       TokenResponse tokenResponse = await _telematicsService.registerUser(
         firstName: firstName,
         lastName: lastName,
-        phone: phone,
         email: email,
-        clientId: clientId,
       );
 
       // Store telematics tokens and username in Firebase database linked to the user's UID
       if (firebaseUser != null) {
-        await _database.ref('userTokens/${firebaseUser.uid}').set({
+        await _database.ref('patients/${firebaseUser.uid}').set({
           'deviceToken': tokenResponse.deviceToken,
           'accessToken': tokenResponse.accessToken,
           'refreshToken': tokenResponse.refreshToken,
+          'firstName': firstName,
+          'lastName': lastName,
+          'gender': gender,
+          'birthday': birthday,
+          'email': email,
+          'Physician Name': physicianName
         });
       }
 
+      return _userFromFirebaseUser(firebaseUser);
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<AppUser?> registerPhysician({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String organizationName,
+    required String npi,
+    required String phone,
+  }) async {
+    try {
+      // Create user with email and password in Firebase Auth
+      UserCredential result = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      User? firebaseUser = result.user;
+
+      // If the user was successfully created, proceed to store their details
+      if (firebaseUser != null) {
+        // Prepare physician-specific details
+        final physicianDetails = {
+          'firstName': firstName,
+          'lastName': lastName,
+          'organizationName': organizationName,
+          'npi': npi,
+          'phone': phone,
+          'email': email,
+        };
+
+        // Store physician details in Firebase Database under a 'physicians' node
+        await _database
+            .ref('physicians/${firebaseUser.uid}')
+            .set(physicianDetails);
+      }
       return _userFromFirebaseUser(firebaseUser);
     } catch (e) {
       print(e.toString());
@@ -86,6 +172,34 @@ class UnifiedAuthService {
     return _userFromFirebaseUser(_auth.currentUser);
   }
 
+  Future<bool> updateUserProfile({
+    required String userId,
+    required String firstName,
+    required String lastName,
+    required String gender,
+    required String birthday,
+    required String physicianName,
+  }) async {
+    try {
+      // Here you would typically make a call to your backend.
+      // This is a placeholder for whatever service you use, for example, Firebase:
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'firstName': firstName,
+        'lastName': lastName,
+        'gender': gender,
+        'birthday': birthday,
+        'physicianName': physicianName,
+      });
+
+      // If the call succeeds, return true
+      return true;
+    } catch (e) {
+      // Handle any errors here
+      print(e.toString());
+      return false;
+    }
+  }
+
   Future<String?> getDeviceTokenForUser(String? uid) async {
     if (uid == null) {
       print("UID is null. Cannot retrieve device token.");
@@ -102,7 +216,7 @@ class UnifiedAuthService {
         if (data != null && data.containsKey('deviceToken')) {
           final String? deviceToken = data['deviceToken'];
           print("Device token for UID $uid is: $deviceToken");
-          login(deviceToken);
+          //login(deviceToken);
           initializeAndStartTracking(deviceToken!);
           return deviceToken;
         } else {
@@ -185,6 +299,38 @@ class UnifiedAuthService {
     } catch (e) {
       print("Failed to send password reset email: $e");
       // Handle the error appropriately
+    }
+  }
+
+  // Method to change the current user's email
+  Future<void> changeEmail(String newEmail) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await user.updateEmail(newEmail);
+        print("Email updated successfully to $newEmail");
+      } catch (e) {
+        print("Failed to update email: $e");
+        // Handle the error appropriately
+      }
+    } else {
+      print("No user is currently signed in.");
+    }
+  }
+
+  // Method to change the current user's password
+  Future<void> changePassword(String newPassword) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await user.updatePassword(newPassword);
+        print("Password updated successfully.");
+      } catch (e) {
+        print("Failed to update password: $e");
+        // Handle the error appropriately
+      }
+    } else {
+      print("No user is currently signed in.");
     }
   }
 

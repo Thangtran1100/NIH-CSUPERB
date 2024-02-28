@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sdk_demo/models/user.dart';
 import 'package:sdk_demo/screens/wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:sdk_demo/services/auth.dart';
+import 'package:sdk_demo/services/UnifiedAuthService.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamProvider<AppUser?>.value(
-      value: AuthService().user,
+      value: UnifiedAuthService().user,
       initialData: null,
       child: MaterialApp(
         title: 'Flutter Firebase App',
