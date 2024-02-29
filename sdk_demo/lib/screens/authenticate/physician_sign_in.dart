@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sdk_demo/models/user.dart';
-import 'package:sdk_demo/screens/physician/physisician_home.dart';
+import 'package:sdk_demo/screens/physician/physician_home.dart';
 import 'package:sdk_demo/services/UnifiedAuthService.dart';
 
 class PhysicianSignIn extends StatefulWidget {
@@ -113,8 +113,8 @@ class _PhysicianSignIn extends State<PhysicianSignIn> {
                             horizontal: 50, vertical: 15),
                         textStyle: const TextStyle(fontSize: 18),
                       ),
-                      child: const Text('Sign in'),
                       onPressed: _signIn,
+                      child: const Text('Sign in'),
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -123,8 +123,8 @@ class _PhysicianSignIn extends State<PhysicianSignIn> {
                             horizontal: 50, vertical: 15),
                         textStyle: const TextStyle(fontSize: 18),
                       ),
-                      child: const Text('Forgot Password?'),
                       onPressed: _resetPassword,
+                      child: const Text('Forgot Password?'),
                     ),
                     const SizedBox(height: 12.0),
                     Text(

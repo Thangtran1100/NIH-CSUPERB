@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sdk_demo/models/user.dart';
 import 'package:sdk_demo/screens/authenticate/roleSelectionScreen.dart';
-import 'package:sdk_demo/screens/patient/home.dart';
+import 'package:sdk_demo/screens/patient/patient_home.dart';
 import 'package:provider/provider.dart';
 
 class Wrapper extends StatelessWidget {

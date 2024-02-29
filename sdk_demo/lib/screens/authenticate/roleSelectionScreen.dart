@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sdk_demo/screens/authenticate/physician_authenticate.dart';
 import 'package:sdk_demo/screens/authenticate/patient_authenticate.dart';
 
+
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({Key? key}) : super(key: key);
 
@@ -33,7 +34,7 @@ class RoleSelectionScreen extends StatelessWidget {
               onPressed: navigateToPhysicianAuthenticate,
               child: const Text('Physician'),
             ),
-            const SizedBox(height: 20), // Add space between the buttons
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: navigateToPatientAuthenticate,
               child: const Text('Patient'),

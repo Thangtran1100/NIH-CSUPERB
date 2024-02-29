@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -66,15 +65,14 @@ class UnifiedAuthService {
   }
 
   // Register with email, password, and user details for telematics
-  Future<AppUser?> registerPatient({
-    required String email,
-    required String password,
-    required String firstName,
-    required String lastName,
-    required String gender,
-    required String birthday,
-    required String physicianName
-  }) async {
+  Future<AppUser?> registerPatient(
+      {required String email,
+      required String password,
+      required String firstName,
+      required String lastName,
+      required String gender,
+      required String birthday,
+      required String physicianName}) async {
     try {
       // Firebase Authentication to create user
       UserCredential result = await _auth.createUserWithEmailAndPassword(
@@ -172,33 +170,21 @@ class UnifiedAuthService {
     return _userFromFirebaseUser(_auth.currentUser);
   }
 
-  Future<bool> updateUserProfile({
-    required String userId,
-    required String firstName,
-    required String lastName,
-    required String gender,
-    required String birthday,
-    required String physicianName,
-  }) async {
-    try {
-      // Here you would typically make a call to your backend.
-      // This is a placeholder for whatever service you use, for example, Firebase:
-      await FirebaseFirestore.instance.collection('users').doc(userId).update({
-        'firstName': firstName,
-        'lastName': lastName,
-        'gender': gender,
-        'birthday': birthday,
-        'physicianName': physicianName,
-      });
-
-      // If the call succeeds, return true
-      return true;
-    } catch (e) {
-      // Handle any errors here
-      print(e.toString());
-      return false;
+  Future<Map<String, dynamic>?> fetchUserDetails(String uid) async {
+  DatabaseReference dbRef = FirebaseDatabase.instance.ref('patients/$uid');
+  try {
+    DataSnapshot snapshot = await dbRef.get();
+    if (snapshot.exists) {
+      return Map<String, dynamic>.from(snapshot.value as Map);
+    } else {
+      print("No user details found for UID $uid.");
     }
+  } catch (e) {
+    print("Error fetching user details for UID $uid: $e");
   }
+  return null;
+}
+
 
   Future<String?> getDeviceTokenForUser(String? uid) async {
     if (uid == null) {

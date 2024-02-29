@@ -14,7 +14,6 @@ class _PatientRegistrationState extends State<PatientRegistration> {
   final UnifiedAuthService _auth = UnifiedAuthService();
   final _formKey = GlobalKey<FormState>();
 
-  // Add fields for telematics registration
   String email = '';
   String password = '';
   String firstName = '';
@@ -51,29 +50,29 @@ class _PatientRegistrationState extends State<PatientRegistration> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Registration')),
+      appBar: AppBar(title: const Text('Registration')),
       body: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'First Name'),
+                  decoration: const InputDecoration(labelText: 'First Name'),
                   onSaved: (value) => firstName = value ?? '',
                   validator: (value) =>
                       value!.isEmpty ? 'Please enter your first name' : null,
                 ),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Last Name'),
+                  decoration: const InputDecoration(labelText: 'Last Name'),
                   onSaved: (value) => lastName = value ?? '',
                   validator: (value) =>
                       value!.isEmpty ? 'Please enter your last name' : null,
                 ),
                 DropdownButtonFormField<String>(
                   value: gender.isEmpty ? null : gender,
-                  hint: Text('Select Gender'),
+                  hint: const Text('Select Gender'),
                   onChanged: (String? newValue) {
                     setState(() {
                       gender = newValue!;
@@ -92,18 +91,17 @@ class _PatientRegistrationState extends State<PatientRegistration> {
                     labelText: 'Birthday',
                     suffixIcon: Icon(Icons.calendar_today),
                   ),
-                  controller: TextEditingController(text: birthday), // Display the selected date
+                  controller: TextEditingController(text: birthday), 
                   onTap: () {
-                    // Call the date picker when tapping on the field
-                    FocusScope.of(context).requestFocus(new FocusNode()); // to prevent opening the keyboard
+                    FocusScope.of(context).requestFocus(FocusNode());
                     _selectDate(context);
                   },
-                  readOnly: true, // to prevent opening the keyboard
+                  readOnly: true,
                   onSaved: (value) => birthday = value ?? '',
                   validator: (value) => value!.isEmpty ? 'Please enter your birthday' : null,
                 ),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Email'),
+                  decoration: const InputDecoration(labelText: 'Email'),
                   onSaved: (value) => email = value ?? '',
                   validator: (value) =>
                       value!.isEmpty ? 'Please enter your email' : null,
@@ -131,10 +129,10 @@ class _PatientRegistrationState extends State<PatientRegistration> {
                   },
                 ),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Physician Name'),
+                  decoration: const InputDecoration(labelText: 'Physician Name'),
                   onSaved: (value) => physicianName = value ?? '',
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState?.validate() ?? false) {
@@ -158,14 +156,14 @@ class _PatientRegistrationState extends State<PatientRegistration> {
                       }
                     }
                   },
-                  child: Text('Register'),
+                  child: const Text('Register'),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
                     widget.toggleView();
                   },
-                  child: Text('Already have an account? Sign in here'),
+                  child: const Text('Already have an account? Sign in here'),
                 ),
               ],
             ),

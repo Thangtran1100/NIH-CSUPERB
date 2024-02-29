@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sdk_demo/models/user.dart';
-import 'package:sdk_demo/screens/patient/home.dart';
+import 'package:sdk_demo/screens/patient/patient_home.dart';
 import 'package:sdk_demo/services/UnifiedAuthService.dart';
 
 class PatientSignIn extends StatefulWidget {
@@ -30,16 +30,11 @@ class _PatientSignInState extends State<PatientSignIn> {
         if (!mounted) return;
 
         if (user != null) {
-          String? deviceToken = await _auth.getDeviceTokenForUser(user.uid);
+          //String? deviceToken = await _auth.getDeviceTokenForUser(user.uid);
 
           if (!mounted) return;
 
-          if (deviceToken != null) {
-            await _auth.login(deviceToken);
-
-            if (!mounted) return;
-
-            _showSDKEnabledDialog();
+          _showSDKEnabledDialog();
 
             Navigator.of(context).pop(); // This dismisses the dialog
             Navigator.pushReplacement(
@@ -49,9 +44,25 @@ class _PatientSignInState extends State<PatientSignIn> {
 
             // Stop loading
             setState(() => isLoading = false);
-          } else {
-            throw Exception('Device token could not be retrieved.');
-          }
+
+          // if (deviceToken != null) {
+          //   await _auth.login(deviceToken);
+
+          //   if (!mounted) return;
+
+          //   _showSDKEnabledDialog();
+
+          //   Navigator.of(context).pop(); // This dismisses the dialog
+          //   Navigator.pushReplacement(
+          //     context,
+          //     MaterialPageRoute(builder: (context) => const Home()),
+          //   );
+
+          //   // Stop loading
+          //   setState(() => isLoading = false);
+          // } else {
+          //   throw Exception('Device token could not be retrieved.');
+          // }
         } else {
           throw Exception(
               'Failed to sign in. Please check your email and password.');
@@ -70,11 +81,11 @@ class _PatientSignInState extends State<PatientSignIn> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('SDK Enabled'),
-          content: Text('The SDK has been enabled and tracking has started.'),
+          title: const Text('SDK Enabled'),
+          content: const Text('The SDK has been enabled and tracking has started.'),
           actions: <Widget>[
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -145,8 +156,8 @@ class _PatientSignInState extends State<PatientSignIn> {
                             horizontal: 50, vertical: 15),
                         textStyle: const TextStyle(fontSize: 18),
                       ),
-                      child: const Text('Sign in'),
                       onPressed: _signIn,
+                      child: const Text('Sign in'),
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -155,8 +166,8 @@ class _PatientSignInState extends State<PatientSignIn> {
                             horizontal: 50, vertical: 15),
                         textStyle: const TextStyle(fontSize: 18),
                       ),
-                      child: const Text('Forgot Password?'),
                       onPressed: _resetPassword,
+                      child: const Text('Forgot Password?'),
                     ),
                     const SizedBox(height: 12.0),
                     Text(

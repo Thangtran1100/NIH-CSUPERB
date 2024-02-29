@@ -28,9 +28,9 @@ class _PhysicianRegistrationState extends State<PhysicianRegistration> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Physician Registration')),
+      appBar: AppBar(title: const Text('Physician Registration')),
       body: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -121,14 +121,14 @@ class _PhysicianRegistrationState extends State<PhysicianRegistration> {
                       }
                     }
                   },
-                  child: Text('Register'),
+                  child: const Text('Register'),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
                     widget.toggleView();
                   },
-                  child: Text('Already have an account? Sign in here'),
+                  child: const Text('Already have an account? Sign in here'),
                 ),
               ],
             ),

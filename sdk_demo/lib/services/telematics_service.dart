@@ -52,7 +52,6 @@ final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
           refreshToken: responseData['Result']['RefreshToken'],
         );
       } else {
-        // Handle error
         throw Exception('Failed to register user: ${response.statusCode}');
       }
     } catch (e) {
@@ -77,14 +76,12 @@ final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
     );
 
     if (response.statusCode == 200) {
-      // Parse the JSON response
       var data = json.decode(response.body);
       return {
         'accessToken': data['accessToken'],
         'refreshToken': data['refreshToken'],
       };
     } else {
-      // Handle error or invalid response
       print("Login failed: ${response.body}");
       throw Exception('Failed to login with device token: ${response.statusCode}');
     }
