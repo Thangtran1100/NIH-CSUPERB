@@ -86,4 +86,39 @@ final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
       throw Exception('Failed to login with device token: ${response.statusCode}');
     }
   }
+
+  // Method to fetch daily statistics from the Telematics API
+  Future<String> fetchDailyStatistics(
+      String startDate, String endDate, String authToken) async {
+    var client = http.Client();
+    String statistics = '';
+    try {
+      var url = Uri.parse(
+              'https://api.telematicssdk.com/indicators/v2/Statistics/daily')
+          .replace(queryParameters: {
+        'StartDate': startDate,
+        'EndDate': endDate,
+      });
+
+      final response = await client.get(
+        url,
+        headers: {
+          'accept': 'application/json',
+          'authorization': 'Bearer $authToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        statistics = response.body;
+      } else {
+        print(
+            'Failed to fetch daily statistics, status code: ${response.statusCode}, response: ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching daily statistics: $e');
+    } finally {
+      client.close();
+    }
+    return statistics;
+  }
 }

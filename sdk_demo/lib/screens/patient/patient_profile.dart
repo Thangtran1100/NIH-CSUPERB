@@ -16,45 +16,39 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final List<String> _genderOptions = ['Male', 'Female', 'Other'];
   String? _selectedGender;
+  String? _selectedPhysicianUid;
+  List<DropdownMenuItem<String>> _physicianItems = [];
 
-  // Create TextEditingController for each field
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _birthdayController;
   late TextEditingController _genderController;
   late TextEditingController _emailController;
-  late TextEditingController _physicianNameController;
   late TextEditingController _newPasswordController;
   late TextEditingController _confirmPasswordController;
 
   @override
   void initState() {
     super.initState();
-    _selectedGender = widget.userDetails['gender'] ?? _genderOptions[0];
-    _firstNameController =
-        TextEditingController(text: widget.userDetails['firstName']);
-    _lastNameController =
-        TextEditingController(text: widget.userDetails['lastName']);
-    _birthdayController =
-        TextEditingController(text: widget.userDetails['birthday']);
-    _genderController =
-        TextEditingController(text: widget.userDetails['gender']);
+    _selectedGender = widget.userDetails['gender'];
+    _firstNameController = TextEditingController(text: widget.userDetails['firstName']);
+    _lastNameController = TextEditingController(text: widget.userDetails['lastName']);
+    _birthdayController = TextEditingController(text: widget.userDetails['birthday']);
+    _genderController = TextEditingController(text: widget.userDetails['gender']);
     _emailController = TextEditingController(text: widget.userDetails['email']);
-    _physicianNameController =
-        TextEditingController(text: widget.userDetails['Physician Name']);
     _newPasswordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
+    _selectedPhysicianUid = widget.userDetails['Physician ID'];
+    _loadPhysicians();
   }
 
   @override
   void dispose() {
-    // Dispose of the controllers when the widget is removed from the widget tree
     _firstNameController.dispose();
     _lastNameController.dispose();
     _birthdayController.dispose();
     _genderController.dispose();
     _emailController.dispose();
-    _physicianNameController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -91,7 +85,7 @@ class _ProfilePageState extends State<ProfilePage> {
       'birthday': _birthdayController.text,
       'gender': _selectedGender, 
       'email': _emailController.text.trim(),
-      'Physician Name': _physicianNameController.text.trim(),
+      'Physician ID': _selectedPhysicianUid,
     };
 
     await FirebaseDatabase.instance
@@ -109,26 +103,51 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> updateUserPassword() async {
-    if (_newPasswordController.text.trim() ==
-        _confirmPasswordController.text.trim()) {
-      try {
-        await _auth
-            .getCurrentUser()
-            ?.updatePassword(_newPasswordController.text.trim());
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Password updated successfully")),
-        );
-      } catch (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to update password: $error")),
-        );
-      }
-    } else {
+  if (_newPasswordController.text.trim().isEmpty && _confirmPasswordController.text.trim().isEmpty) {
+    return;
+  }
+
+  if (_newPasswordController.text.trim() == _confirmPasswordController.text.trim()) {
+    try {
+      await _auth
+          .getCurrentUser()
+          ?.updatePassword(_newPasswordController.text.trim());
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match")),
+        const SnackBar(content: Text("Password updated successfully")),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to update password: $error")),
       );
     }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Passwords do not match")),
+    );
   }
+}
+
+
+  void userSignInAndLoadPhysicians() async {
+  _auth.getCurrentAppUser(); 
+}
+
+  void _loadPhysicians() async {
+    try {
+      var items = await _auth.getPhysicianDropdownItems();
+      setState(() {
+        _physicianItems = items;
+        if (_selectedPhysicianUid == null || !items.any((item) => item.value == _selectedPhysicianUid)) {
+          _selectedPhysicianUid = items.first.value;
+        }
+      });
+    } catch (e) {
+      print("Error loading physicians: $e");
+    }
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -178,9 +197,16 @@ class _ProfilePageState extends State<ProfilePage> {
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
             ),
-            TextFormField(
-              controller: _physicianNameController,
-              decoration: const InputDecoration(labelText: 'Physician Name'),
+            DropdownButtonFormField<String>(
+              value: _selectedPhysicianUid,
+              decoration: const InputDecoration(labelText: 'Physician'),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedPhysicianUid = newValue;
+                });
+              },
+              items: _physicianItems,
+              validator: (value) => (value == null || value.isEmpty) ? 'Please select your physician' : null,
             ),
             TextFormField(
               controller: _newPasswordController,

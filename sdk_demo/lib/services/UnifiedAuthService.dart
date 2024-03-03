@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sdk_demo/models/user.dart';
 import 'package:sdk_demo/services/telematics_service.dart';
@@ -17,6 +17,9 @@ class UnifiedAuthService {
 
   final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
   final String instanceKey = "0ec87b0e-5eb2-4e79-a439-3e16aa36104c";
+
+  late final String? selectedPhysicianUid;
+
 
   // Converts Firebase User to custom AppUser
   AppUser? _userFromFirebaseUser(User? user) {
@@ -64,6 +67,71 @@ class UnifiedAuthService {
     }
   }
 
+  Future<List<DropdownMenuItem<String>>> getPhysicianDropdownItems() async {
+    List<DropdownMenuItem<String>> items = [];
+    DatabaseReference ref = FirebaseDatabase.instance.ref('physicians');
+
+    // Only proceed if the user is authenticated
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      try {
+        DatabaseEvent event = await ref.once();
+        Map<dynamic, dynamic> physicians = event.snapshot.value as Map<dynamic, dynamic>;
+        physicians.forEach((key, value) {
+          String fullName = '${value['firstName']} ${value['lastName']}';
+          items.add(
+            DropdownMenuItem(
+              value: key,
+              child: Text(fullName),
+            ),
+          );
+        });
+      } catch (e) {
+        print(e.toString());
+        // Handle errors or return an empty list
+      }
+    } else {
+      // Handle the case where the user is not authenticated
+    }
+    return items;
+  }
+
+  Future<List<DropdownMenuItem<String>>> getPhysicianDropdownMenu(String currentPhysicianId) async {
+  List<DropdownMenuItem<String>> items = [];
+  DatabaseReference ref = FirebaseDatabase.instance.ref('physicians');
+
+  // Only proceed if the user is authenticated
+  User? currentUser = FirebaseAuth.instance.currentUser;
+  if (currentUser != null) {
+    try {
+      DatabaseEvent event = await ref.once();
+      Map<dynamic, dynamic> physicians = event.snapshot.value as Map<dynamic, dynamic>;
+      physicians.forEach((key, value) {
+        String firstName = value['firstName'] ?? '';
+        String lastName = value['lastName'] ?? '';
+        String fullName = '$firstName $lastName'.trim();
+        items.add(
+          DropdownMenuItem(
+            value: key,
+            child: Text(fullName),
+          ),
+        );
+      });
+
+      // Find the currently selected physician's UID and set it
+      selectedPhysicianUid = currentPhysicianId;
+    } catch (e) {
+      print(e.toString());
+    }
+  } else {
+    print('No authenticated user found.');
+  }
+
+  return items;
+}
+
+
+
   // Register with email, password, and user details for telematics
   Future<AppUser?> registerPatient(
       {required String email,
@@ -72,7 +140,8 @@ class UnifiedAuthService {
       required String lastName,
       required String gender,
       required String birthday,
-      required String physicianName}) async {
+      required String physicianUID
+      }) async {
     try {
       // Firebase Authentication to create user
       UserCredential result = await _auth.createUserWithEmailAndPassword(
@@ -99,7 +168,7 @@ class UnifiedAuthService {
           'gender': gender,
           'birthday': birthday,
           'email': email,
-          'Physician Name': physicianName
+          'Physician ID': physicianUID
         });
       }
 
@@ -326,70 +395,26 @@ class UnifiedAuthService {
       // Initialize the SDK with the device token
       await _trackingApi.setDeviceID(deviceId: deviceToken);
 
-      // Show the permission wizard and request necessary permissions
-      _trackingApi.showPermissionWizard(
+      // Request necessary permissions
+      await _trackingApi.showPermissionWizard(
         enableAggressivePermissionsWizard: true,
         enableAggressivePermissionsWizardPage: true,
       );
 
-      // Listener for permission wizard result
-      final permissionWizardResult =
-          await _trackingApi.onPermissionWizardClose.first;
-      if (permissionWizardResult == PermissionWizardResult.allGranted) {
-        // Check if SDK is enabled and enable it if not
-        final isSdkEnabled = await _trackingApi.isSdkEnabled() ?? false;
-        if (!isSdkEnabled) {
-          await _trackingApi.setEnableSdk(enable: true);
-        }
+      // Check if SDK is enabled and enable it if not
+      await _trackingApi.setEnableSdk(enable: true);
 
-        // Start tracking
-        final isTracking = await _trackingApi.isTracking() ?? false;
-        if (!isTracking) {
-          await _trackingApi.startTracking();
-        }
+      // enable high frequency
+      await _trackingApi.enableHF(value: true);
 
-        print("SDK Enabled and Tracking Started");
-      } else {
-        print(
-            "Permissions not fully granted. SDK not enabled and tracking not started.");
-      }
+      // Start tracking
+      await _trackingApi.setDisableTracking(value: false);
+
+      print("SDK Enabled and Tracking Started");
     } catch (e) {
       print("Error initializing and starting tracking: $e");
     }
   }
 
-  // Method to fetch daily statistics from the Telematics API
-  Future<String> fetchDailyStatistics(
-      String startDate, String endDate, String authToken) async {
-    var client = http.Client();
-    String statistics = '';
-    try {
-      var url = Uri.parse(
-              'https://api.telematicssdk.com/indicators/v2/Statistics/daily')
-          .replace(queryParameters: {
-        'StartDate': startDate,
-        'EndDate': endDate,
-      });
-
-      final response = await client.get(
-        url,
-        headers: {
-          'accept': 'application/json',
-          'authorization': 'Bearer $authToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        statistics = response.body;
-      } else {
-        print(
-            'Failed to fetch daily statistics, status code: ${response.statusCode}, response: ${response.body}');
-      }
-    } catch (e) {
-      print('Error fetching daily statistics: $e');
-    } finally {
-      client.close();
-    }
-    return statistics;
-  }
+  
 }

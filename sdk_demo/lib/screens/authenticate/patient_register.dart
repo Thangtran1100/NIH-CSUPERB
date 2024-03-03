@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sdk_demo/services/UnifiedAuthService.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PatientRegistration extends StatefulWidget {
   final Function toggleView;
@@ -23,14 +24,40 @@ class _PatientRegistrationState extends State<PatientRegistration> {
   List<String> genders = ['Male', 'Female', 'Other'];
   String gender = '';
   String physicianName = '';
+  String? physicianUid;
   String error = '';
 
-  @override
-  void initState() {
-    super.initState();
+  List<DropdownMenuItem<String>> physicianItems = [];
 
-    birthday = DateFormat.yMd().format(DateTime.now());
+  @override
+void initState() {
+  super.initState();
+  physicianUid = null; 
+  anonymousSignInAndLoadPhysicians();
+  birthday = DateFormat.yMd().format(DateTime.now());
+}
+
+
+void anonymousSignInAndLoadPhysicians() async {
+  await _auth.signInAnon(); 
+  loadPhysicians();
+}
+
+void loadPhysicians() async {
+  try {
+    var items = await _auth.getPhysicianDropdownItems();
+    setState(() {
+      physicianItems = items;
+      if (items.isNotEmpty && physicianUid == null) {
+        physicianUid = items.first.value;
+      }
+    });
+  } catch (e) {
+    print("Error loading physicians: $e");
   }
+}
+
+
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -46,6 +73,7 @@ class _PatientRegistrationState extends State<PatientRegistration> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -128,10 +156,18 @@ class _PatientRegistrationState extends State<PatientRegistration> {
                     return null;
                   },
                 ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Physician Name'),
-                  onSaved: (value) => physicianName = value ?? '',
-                ),
+                DropdownButtonFormField<String>(
+  value: physicianUid, 
+  hint: const Text('Select Physician'),
+  onChanged: (String? newValue) {
+    setState(() {
+      physicianUid = newValue ?? '';
+      physicianName = physicianItems.firstWhere((item) => item.value == newValue, orElse: () => DropdownMenuItem<String>(value: '', child: Text(''))).child.toString();
+    });
+  },
+  validator: (value) => (value == null || value.isEmpty) ? 'Please select your physician' : null,
+  items: physicianItems,
+),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async {
@@ -144,14 +180,14 @@ class _PatientRegistrationState extends State<PatientRegistration> {
                         lastName: lastName,
                         birthday: birthday,
                         gender: gender,
-                        physicianName: physicianName
+                        physicianUID: physicianUid!
                       );
                       if (result == null) {
-                        setState(() =>
-                            error = 'An error occurred during registration');
-                      }
-                      else
-                      {
+                        setState(() => error = 'An error occurred during registration');
+                      } else {
+                        await FirebaseFirestore.instance.collection('physicians').doc(physicianUid).update({
+                          'patients': FieldValue.arrayUnion([result.uid]),
+                        });
                         widget.toggleView();
                       }
                     }

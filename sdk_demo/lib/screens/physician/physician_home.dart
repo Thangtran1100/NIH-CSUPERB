@@ -20,9 +20,7 @@ class _PhysicianHomeState extends State<PhysicianHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Demo App'),
-        backgroundColor: Colors.blue[400],
-        elevation: 0.0,
+        title: const Text('Home'),
       ),
       body: IndexedStack(
         index: _currentIndex,

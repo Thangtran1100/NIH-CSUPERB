@@ -11,6 +11,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _currentIndex = 0;
 
+  final List<String> titles = ['Home Page', 'Settings'];
+
   final List<Widget> pages = [
     const Center(child: Text('Home Page')), 
     const SettingsPage(), 
@@ -20,9 +22,8 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Demo App'),
-        backgroundColor: Colors.blue[400],
-        elevation: 0.0,
+        // Set the AppBar title based on the current index
+        title: Text(titles[_currentIndex]),
       ),
       body: IndexedStack(
         index: _currentIndex,
