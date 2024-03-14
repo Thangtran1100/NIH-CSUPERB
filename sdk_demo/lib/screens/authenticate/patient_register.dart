@@ -180,7 +180,8 @@ void loadPhysicians() async {
                         lastName: lastName,
                         birthday: birthday,
                         gender: gender,
-                        physicianUID: physicianUid!
+                        physicianUID: physicianUid!,
+                        physicianName: physicianName
                       );
                       if (result == null) {
                         setState(() => error = 'An error occurred during registration');

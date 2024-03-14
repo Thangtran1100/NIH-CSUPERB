@@ -27,45 +27,51 @@ class _PatientSignInState extends State<PatientSignIn> {
         setState(() => isLoading = true);
         AppUser? user = await _auth.signInWithEmailAndPassword(email, password);
 
+        // Check if the widget is still mounted before proceeding
         if (!mounted) return;
 
         if (user != null) {
-          //String? deviceToken = await _auth.getDeviceTokenForUser(user.uid);
+          // Perform the role check after successful sign-in
+          String role = await _auth.checkUserRole(user.uid!);
 
+          // Check if the widget is still mounted before proceeding
           if (!mounted) return;
 
-          _showSDKEnabledDialog();
+          if (role == 'Patient') {
+            // Check if the widget is still mounted before proceeding
+            if (!mounted) return;
 
-            Navigator.of(context).pop(); // This dismisses the dialog
+            await _auth.getDeviceTokenForUser(user.uid);
+
+            // Check if the widget is still mounted before proceeding
+            if (!mounted) return;
+
+            Navigator.of(context).pop(); // This dismisses any open dialogs
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const Home()),
+              MaterialPageRoute(
+                  builder: (context) =>
+                      const Home()), // Navigate to the patient home
             );
-
-            // Stop loading
-            setState(() => isLoading = false);
-
-          // if (deviceToken != null) {
-          //   await _auth.login(deviceToken);
-
-          //   if (!mounted) return;
-
-          //   _showSDKEnabledDialog();
-
-          //   Navigator.of(context).pop(); // This dismisses the dialog
-          //   Navigator.pushReplacement(
-          //     context,
-          //     MaterialPageRoute(builder: (context) => const Home()),
-          //   );
-
-          //   // Stop loading
-          //   setState(() => isLoading = false);
-          // } else {
-          //   throw Exception('Device token could not be retrieved.');
-          // }
+          } else if (role == 'Physician') {
+            // If the role is Physician, but this sign-in method is for Patients,
+            // you might want to show an error or redirect to the Physician sign-in page
+            setState(() {
+              isLoading = false;
+              error = 'Physicians are not allowed to sign in here.';
+            });
+          } else {
+            // Handle the case where the role is not recognized
+            setState(() {
+              isLoading = false;
+              error = 'Your role is not recognized. Please contact support.';
+            });
+          }
         } else {
-          throw Exception(
-              'Failed to sign in. Please check your email and password.');
+          setState(() {
+            isLoading = false;
+            error = 'Failed to sign in. Please check your email and password.';
+          });
         }
       } catch (e) {
         setState(() {
@@ -82,7 +88,8 @@ class _PatientSignInState extends State<PatientSignIn> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('SDK Enabled'),
-          content: const Text('The SDK has been enabled and tracking has started.'),
+          content:
+              const Text('The SDK has been enabled and tracking has started.'),
           actions: <Widget>[
             TextButton(
               child: const Text('OK'),

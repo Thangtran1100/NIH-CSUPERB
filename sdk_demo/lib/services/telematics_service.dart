@@ -11,8 +11,8 @@ class TokenResponse {
 }
 
 class TelematicsService {
-final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
-    final String instanceKey = "0ec87b0e-5eb2-4e79-a439-3e16aa36104c";
+final String instanceId = "ee050880-86db-4502-9e82-366da9e3d4de";
+    final String instanceKey = "b0fafb2a-bd86-408e-87f5-cce93619be2c";
 
   Future<TokenResponse> registerUser({
     required String firstName,

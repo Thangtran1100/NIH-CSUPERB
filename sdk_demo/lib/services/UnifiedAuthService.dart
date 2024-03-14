@@ -15,11 +15,10 @@ class UnifiedAuthService {
 
   final TrackingApi _trackingApi = TrackingApi();
 
-  final String instanceId = "213cc2b3-59c3-4fbf-b66a-dab7f53406d9";
-  final String instanceKey = "0ec87b0e-5eb2-4e79-a439-3e16aa36104c";
+  final String instanceId = "ee050880-86db-4502-9e82-366da9e3d4de";
+  final String instanceKey = "b0fafb2a-bd86-408e-87f5-cce93619be2c";
 
   late final String? selectedPhysicianUid;
-
 
   // Converts Firebase User to custom AppUser
   AppUser? _userFromFirebaseUser(User? user) {
@@ -76,7 +75,8 @@ class UnifiedAuthService {
     if (currentUser != null) {
       try {
         DatabaseEvent event = await ref.once();
-        Map<dynamic, dynamic> physicians = event.snapshot.value as Map<dynamic, dynamic>;
+        Map<dynamic, dynamic> physicians =
+            event.snapshot.value as Map<dynamic, dynamic>;
         physicians.forEach((key, value) {
           String fullName = '${value['firstName']} ${value['lastName']}';
           items.add(
@@ -96,41 +96,41 @@ class UnifiedAuthService {
     return items;
   }
 
-  Future<List<DropdownMenuItem<String>>> getPhysicianDropdownMenu(String currentPhysicianId) async {
-  List<DropdownMenuItem<String>> items = [];
-  DatabaseReference ref = FirebaseDatabase.instance.ref('physicians');
+  Future<List<DropdownMenuItem<String>>> getPhysicianDropdownMenu(
+      String currentPhysicianId) async {
+    List<DropdownMenuItem<String>> items = [];
+    DatabaseReference ref = FirebaseDatabase.instance.ref('physicians');
 
-  // Only proceed if the user is authenticated
-  User? currentUser = FirebaseAuth.instance.currentUser;
-  if (currentUser != null) {
-    try {
-      DatabaseEvent event = await ref.once();
-      Map<dynamic, dynamic> physicians = event.snapshot.value as Map<dynamic, dynamic>;
-      physicians.forEach((key, value) {
-        String firstName = value['firstName'] ?? '';
-        String lastName = value['lastName'] ?? '';
-        String fullName = '$firstName $lastName'.trim();
-        items.add(
-          DropdownMenuItem(
-            value: key,
-            child: Text(fullName),
-          ),
-        );
-      });
+    // Only proceed if the user is authenticated
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      try {
+        DatabaseEvent event = await ref.once();
+        Map<dynamic, dynamic> physicians =
+            event.snapshot.value as Map<dynamic, dynamic>;
+        physicians.forEach((key, value) {
+          String firstName = value['firstName'] ?? '';
+          String lastName = value['lastName'] ?? '';
+          String fullName = '$firstName $lastName'.trim();
+          items.add(
+            DropdownMenuItem(
+              value: key,
+              child: Text(fullName),
+            ),
+          );
+        });
 
-      // Find the currently selected physician's UID and set it
-      selectedPhysicianUid = currentPhysicianId;
-    } catch (e) {
-      print(e.toString());
+        // Find the currently selected physician's UID and set it
+        selectedPhysicianUid = currentPhysicianId;
+      } catch (e) {
+        print(e.toString());
+      }
+    } else {
+      print('No authenticated user found.');
     }
-  } else {
-    print('No authenticated user found.');
+
+    return items;
   }
-
-  return items;
-}
-
-
 
   // Register with email, password, and user details for telematics
   Future<AppUser?> registerPatient(
@@ -140,8 +140,8 @@ class UnifiedAuthService {
       required String lastName,
       required String gender,
       required String birthday,
-      required String physicianUID
-      }) async {
+      required String physicianUID,
+      required String physicianName}) async {
     try {
       // Firebase Authentication to create user
       UserCredential result = await _auth.createUserWithEmailAndPassword(
@@ -168,7 +168,8 @@ class UnifiedAuthService {
           'gender': gender,
           'birthday': birthday,
           'email': email,
-          'Physician ID': physicianUID
+          'Physician ID': physicianUID,
+          'Physician Name': physicianName
         });
       }
 
@@ -240,20 +241,19 @@ class UnifiedAuthService {
   }
 
   Future<Map<String, dynamic>?> fetchUserDetails(String uid) async {
-  DatabaseReference dbRef = FirebaseDatabase.instance.ref('patients/$uid');
-  try {
-    DataSnapshot snapshot = await dbRef.get();
-    if (snapshot.exists) {
-      return Map<String, dynamic>.from(snapshot.value as Map);
-    } else {
-      print("No user details found for UID $uid.");
+    DatabaseReference dbRef = FirebaseDatabase.instance.ref('patients/$uid');
+    try {
+      DataSnapshot snapshot = await dbRef.get();
+      if (snapshot.exists) {
+        return Map<String, dynamic>.from(snapshot.value as Map);
+      } else {
+        print("No user details found for UID $uid.");
+      }
+    } catch (e) {
+      print("Error fetching user details for UID $uid: $e");
     }
-  } catch (e) {
-    print("Error fetching user details for UID $uid: $e");
+    return null;
   }
-  return null;
-}
-
 
   Future<String?> getDeviceTokenForUser(String? uid) async {
     if (uid == null) {
@@ -261,7 +261,7 @@ class UnifiedAuthService {
       return null;
     }
 
-    DatabaseReference dbRef = FirebaseDatabase.instance.ref('userTokens/$uid');
+    DatabaseReference dbRef = FirebaseDatabase.instance.ref('patients/$uid');
 
     try {
       DataSnapshot snapshot = await dbRef.get();
@@ -271,7 +271,7 @@ class UnifiedAuthService {
         if (data != null && data.containsKey('deviceToken')) {
           final String? deviceToken = data['deviceToken'];
           print("Device token for UID $uid is: $deviceToken");
-          //login(deviceToken);
+          login(deviceToken);
           initializeAndStartTracking(deviceToken!);
           return deviceToken;
         } else {
@@ -307,6 +307,7 @@ class UnifiedAuthService {
     if (response.statusCode == 200) {
       // If server returns an OK response, parse the JSON.
       print('Login Successful');
+      
     } else {
       // If the server did not return a 200 OK response,
       print(
@@ -322,7 +323,7 @@ class UnifiedAuthService {
       return null;
     }
 
-    DatabaseReference dbRef = FirebaseDatabase.instance.ref('userTokens/$uid');
+    DatabaseReference dbRef = FirebaseDatabase.instance.ref('patients/$uid');
 
     try {
       DataSnapshot snapshot = await dbRef.get();
@@ -407,14 +408,67 @@ class UnifiedAuthService {
       // enable high frequency
       await _trackingApi.enableHF(value: true);
 
-      // Start tracking
-      await _trackingApi.setDisableTracking(value: false);
-
       print("SDK Enabled and Tracking Started");
     } catch (e) {
       print("Error initializing and starting tracking: $e");
     }
   }
 
-  
+  Future<dynamic> fetchTrips(String authToken) async {
+    final startDate = DateTime(2024, 1, 1).toUtc().toIso8601String();
+    final endDate = DateTime.now().toUtc().toIso8601String();
+
+    var headers = {
+      'accept': 'application/json',
+      'content-type': 'application/json',
+      'authorization': 'Bearer $authToken',
+    };
+
+    var body = jsonEncode({
+      "StartDate": startDate,
+      "EndDate": endDate,
+      "SortBy": "StartDateUtc",
+      "IncludeRelated": true,
+      "Paging": {"Page": 1, "Count": 10, "IncludePagingInfo": true}
+    });
+
+    var response = await http.post(
+      Uri.parse("https://api.telematicssdk.com/trips/get/v1/short/"),
+      headers: headers,
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      // Decode the JSON response body to a Dart object
+      final data = jsonDecode(response.body);
+      print('Data fetched successfully');
+      return data; // Return the decoded body
+    } else {
+      // Handle error
+      print('Failed to fetch data');
+      return null;
+    }
+  }
+
+  // Function to check the user's role
+  Future<String> checkUserRole(String uid) async {
+    // Check if UID exists under 'physicians' node
+    final physicianRef = FirebaseDatabase.instance.ref('physicians/$uid');
+    final physicianSnapshot = await physicianRef.get();
+
+    if (physicianSnapshot.exists) {
+      return 'Physician';
+    }
+
+    // Check if UID exists under 'patients' node
+    final patientRef = FirebaseDatabase.instance.ref('patients/$uid');
+    final patientSnapshot = await patientRef.get();
+
+    if (patientSnapshot.exists) {
+      return 'Patient';
+    }
+
+    // User is neither a physician nor a patient, or doesn't exist
+    return 'Unknown';
+  }
 }

@@ -5,8 +5,9 @@ import 'package:sdk_demo/services/UnifiedAuthService.dart';
 
 class PhysicianSignIn extends StatefulWidget {
   final Function toggleView;
+  final Function(AppUser user) onSignIn;
 
-  const PhysicianSignIn({Key? key, required this.toggleView}) : super(key: key);
+  const PhysicianSignIn({Key? key, required this.toggleView, required this.onSignIn}) : super(key: key);
 
   @override
   State<PhysicianSignIn> createState() => _PhysicianSignIn();
@@ -22,36 +23,48 @@ class _PhysicianSignIn extends State<PhysicianSignIn> {
   bool isLoading = false;
 
   void _signIn() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        setState(() => isLoading = true);
-        AppUser? user = await _auth.signInWithEmailAndPassword(email, password);
+  if (_formKey.currentState!.validate()) {
+    setState(() => isLoading = true);
+    try {
+      AppUser? user = await _auth.signInWithEmailAndPassword(email, password);
+      // After awaiting an async function, check if the widget is still mounted
+      if (!mounted) return;
 
+      if (user != null) {
+        String role = await _auth.checkUserRole(user.uid!);
+        // Check again if the widget is still mounted after another async call
         if (!mounted) return;
 
-        if (user != null) {
-          if (!mounted) return;
-
-          Navigator.of(context).pop(); // This dismisses the dialog
+        if (role == 'Physician') {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const PhysicianHome()),
           );
-
-          // Stop loading
-          setState(() => isLoading = false);
         } else {
-          throw Exception(
-              'Failed to sign in. Please check your email and password.');
+          setState(() {
+            isLoading = false;
+            error = 'Only physicians can log in here.';
+          });
         }
-      } catch (e) {
+      } else {
         setState(() {
-          error = e.toString();
           isLoading = false;
+          error = 'Could not sign in with those credentials.';
         });
       }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+        error = e.toString();
+      });
     }
   }
+}
+
+
+
+
 
   // Function to handle password reset
   void _resetPassword() async {

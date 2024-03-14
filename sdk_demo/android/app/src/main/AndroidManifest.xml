@@ -10,6 +10,7 @@ xmlns:tools="http://schemas.android.com/tools">
         android:name=".MyApp"
         android:icon="@mipmap/ic_launcher"
         tools:replace="android:label,android:name">
+        <receiver android:name=".TrackingReceiver"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
