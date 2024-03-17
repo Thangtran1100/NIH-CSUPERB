@@ -13,10 +13,10 @@ class UnifiedAuthService {
   final TelematicsService _telematicsService = TelematicsService();
   final FirebaseDatabase _database = FirebaseDatabase.instance;
 
-  final TrackingApi _trackingApi = TrackingApi();
+  final _trackingApi = TrackingApi();
 
-  final String instanceId = "ee050880-86db-4502-9e82-366da9e3d4de";
-  final String instanceKey = "b0fafb2a-bd86-408e-87f5-cce93619be2c";
+  final String instanceId = "bb86b204-3cd5-4577-b99e-16c853591828";
+  final String instanceKey = "cfaf9e1a-b135-440f-9c19-79a0e3a0a989";
 
   late final String? selectedPhysicianUid;
 
@@ -225,6 +225,7 @@ class UnifiedAuthService {
       UserCredential result = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
       User? user = result.user;
+
       return _userFromFirebaseUser(user);
     } catch (e) {
       print(e.toString());
@@ -272,7 +273,6 @@ class UnifiedAuthService {
           final String? deviceToken = data['deviceToken'];
           print("Device token for UID $uid is: $deviceToken");
           login(deviceToken);
-          initializeAndStartTracking(deviceToken!);
           return deviceToken;
         } else {
           print("Device token not found for UID $uid.");
@@ -289,6 +289,11 @@ class UnifiedAuthService {
   }
 
   Future<void> login(String? deviceToken) async {
+    if (deviceToken == null) {
+      print('Device token is null. Cannot proceed with login.');
+      return; // Early return if deviceToken is null.
+    }
+
     var url = Uri.parse('https://user.telematicssdk.com/v1/Auth/Login');
 
     var headers = {
@@ -305,11 +310,10 @@ class UnifiedAuthService {
     var response = await http.post(url, headers: headers, body: body);
 
     if (response.statusCode == 200) {
-      // If server returns an OK response, parse the JSON.
-      print('Login Successful');
-      
+      // If server returns an OK response, proceed with initialization and tracking
+      initializeAndStartTracking(deviceToken);
     } else {
-      // If the server did not return a 200 OK response,
+      // If the server did not return a 200 OK response
       print(
           'Failed to login, status code: ${response.statusCode}, body: ${response.body}');
       throw Exception(
@@ -403,18 +407,28 @@ class UnifiedAuthService {
       );
 
       // Check if SDK is enabled and enable it if not
-      await _trackingApi.setEnableSdk(enable: true);
+      bool isSdkEnabled = await _trackingApi.isSdkEnabled() ?? false;
+      if (!isSdkEnabled) {
+        await _trackingApi.setEnableSdk(enable: true);
+        print("SDK enabled");
+      }
 
-      // enable high frequency
-      await _trackingApi.enableHF(value: true);
+      bool trackingStatus = await _trackingApi.isTracking() ?? false;
+      if (!trackingStatus) {
+        await _trackingApi.setDisableTracking(value: false);
+        print("Tracking enabled");
+      } else {
+        print(trackingStatus);
+        print("Tracking already enabled");
+      }
 
-      print("SDK Enabled and Tracking Started");
+      print("SDK enabled");
     } catch (e) {
       print("Error initializing and starting tracking: $e");
     }
   }
 
-  Future<dynamic> fetchTrips(String authToken) async {
+  Future<Map<String, dynamic>?> fetchTrips(String authToken) async {
     final startDate = DateTime(2024, 1, 1).toUtc().toIso8601String();
     final endDate = DateTime.now().toUtc().toIso8601String();
 
