@@ -5,29 +5,45 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sdk_demo/screens/patient/patient_settings.dart';
 import 'package:sdk_demo/screens/patient/patient_trips.dart';
+import 'package:sdk_demo/services/notification_service.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
-  _HomeState createState() => _HomeState();
+  HomeState createState() => HomeState();
 }
 
-class _HomeState extends State<Home> {
+class HomeState extends State<Home> with WidgetsBindingObserver{
   int _currentIndex = 0;
   Timer? _inactivityTimer;
   bool _isTripOngoing = false;
   String _speedInfo = "Waiting for trip to start...";
   final double notMovingSpeedThreshold = 0.5; // meters per second
-  final int inactivityTimeout = 600; // seconds
+  final int inactivityTimeout = 60; // seconds
 
   final List<String> titles = ['Home Page', 'Settings'];
+
+  final NotificationService notificationService = NotificationService();
+
+  bool _isAppInForeground = true;
+
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    notificationService.initNotification();
     startListeningLocation();
   }
+
+  @override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  super.didChangeAppLifecycleState(state);
+  _isAppInForeground = state == AppLifecycleState.resumed;
+}
+
+
 
   void startListeningLocation() {
   Geolocator.getPositionStream().listen((Position position) {
@@ -36,40 +52,54 @@ class _HomeState extends State<Home> {
     // Convert speed from m/s to mph
     double speedInMph = speedInMetersPerSecond * 2.23694;
 
+    bool isCurrentlyMoving = speedInMph > notMovingSpeedThreshold;
+
     setState(() {
-      if (speedInMetersPerSecond > notMovingSpeedThreshold) {
-        if (!_isTripOngoing) {
-          // Trip starts
+      // Only update trip state if there is a change
+      if (isCurrentlyMoving != _isTripOngoing) {
+        if (isCurrentlyMoving) {
+          // Movement detected
           _isTripOngoing = true;
           _speedInfo = "Trip started. Speed: ${speedInMph.toStringAsFixed(2)} mph";
-          _inactivityTimer?.cancel(); // Cancel any existing timer
           print("Trip started");
+          _inactivityTimer?.cancel();
         } else {
-          _speedInfo = "Speed: ${speedInMph.toStringAsFixed(2)} mph";
-        }
-      } else if (_isTripOngoing) {
-        // Device is stationary, start or reset inactivity timer
-        _inactivityTimer?.cancel();
-        _inactivityTimer = Timer(Duration(seconds: inactivityTimeout), () {
-          // Consider the trip ended after being stationary for a certain period
-          _isTripOngoing = false;
-          _speedInfo = "Trip ended. Device is stationary.";
-          print("Trip ended");
+          // End of trip detected, start inactivity timer
+          _inactivityTimer?.cancel();
+          _inactivityTimer = Timer(Duration(seconds: inactivityTimeout), () {
+            _isTripOngoing = false;
+            _speedInfo = "Trip ended. Device is stationary.";
+            print("Trip ended");
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              _showEndOfTripDialog(context);
-            }
-          });
-        });
+            if (_isAppInForeground) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _showEndOfTripDialog(context);
       }
     });
+  } else {
+    // Push a local notification as the app is not in the foreground
+    notificationService.showNotification(
+      id: 0,
+      title: 'Trip Completed',
+      body: 'Were you the driver for this trip?',
+      payLoad: 'tripEnded',
+    );
+  }
+          });
+        }
+      } else if (_isTripOngoing) {
+        // Update speed info without changing trip state
+        _speedInfo = "Speed: ${speedInMph.toStringAsFixed(2)} mph";
+      }
+    }); 
   });
 }
 
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _inactivityTimer?.cancel(); // Clean up the timer
     super.dispose();
   }
@@ -84,15 +114,13 @@ class _HomeState extends State<Home> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                // Handle the user's confirmation that they were the driver
+                Navigator.of(context).pop(); 
               },
               child: const Text('Yes'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                // Handle the user's response that they were not the driver
+                Navigator.of(context).pop();
               },
               child: const Text('No'),
             ),
