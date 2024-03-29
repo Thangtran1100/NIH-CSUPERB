@@ -126,7 +126,7 @@ class _PatientSignInState extends State<PatientSignIn> {
         title: const Text('Sign In'),
         actions: <Widget>[
           TextButton.icon(
-            icon: const Icon(Icons.person, color: Colors.white),
+            icon: const Icon(Icons.person_add, color: Colors.white),
             label:
                 const Text('Register', style: TextStyle(color: Colors.white)),
             onPressed: () => widget.toggleView(),

@@ -41,8 +41,8 @@ class _PhysicianHomeState extends State<PhysicianHome> {
   void _filterPatientsList() {
     String filter = _filterController.text.toLowerCase();
     List<Map<dynamic, dynamic>> filteredList = _patientsList.where((patient) {
-      String fullName = '${patient['firstName'] ?? ''} ${patient['lastName'] ?? ''}'.toLowerCase();
-      return fullName.contains(filter);
+      String email = (patient['email'] ?? '').toLowerCase();
+      return email.contains(filter);
     }).toList();
 
     setState(() {
@@ -56,13 +56,14 @@ class _PhysicianHomeState extends State<PhysicianHome> {
       itemBuilder: (context, index) {
         var patient = _filteredPatientsList[index];
         String fullName = '${patient['firstName'] ?? 'No name'} ${patient['lastName'] ?? ''}'.trim();
+        String email = patient['email'] ?? 'No email';
 
         Widget details = Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text('Email: ${patient['email'] ?? 'No email'}'),
+              Text('Email: $email'),
               Text('Physician Name: ${patient['physicianName'] ?? 'No physician name'}'),
               Text('Birthday: ${patient['birthday'] ?? 'No birthday'}'),
               Text('Gender: ${patient['gender'] ?? 'No gender'}'),
@@ -72,6 +73,7 @@ class _PhysicianHomeState extends State<PhysicianHome> {
 
         return ExpansionTile(
           title: Text(fullName, style: TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Text(email), // Display email directly below the name for easy access
           children: [details],
           leading: Icon(Icons.person),
         );
@@ -94,7 +96,6 @@ class _PhysicianHomeState extends State<PhysicianHome> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // Navigate to settings page
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsPage()),
@@ -110,7 +111,7 @@ class _PhysicianHomeState extends State<PhysicianHome> {
             child: TextField(
               controller: _filterController,
               decoration: InputDecoration(
-                labelText: 'Filter by name',
+                labelText: 'Filter by email', // Updated placeholder text
                 suffixIcon: Icon(Icons.search),
               ),
             ),

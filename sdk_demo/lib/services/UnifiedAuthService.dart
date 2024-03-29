@@ -15,8 +15,8 @@ class UnifiedAuthService {
 
   final _trackingApi = TrackingApi();
 
-  final String instanceId = "bb86b204-3cd5-4577-b99e-16c853591828";
-  final String instanceKey = "cfaf9e1a-b135-440f-9c19-79a0e3a0a989";
+  final String instanceId = "49dd2d1c-74c5-4b5f-8713-6410c6b5e1d3";
+  final String instanceKey = "74d45fcb-c06f-4204-98e3-56686d60a39b";
 
   late final String? selectedPhysicianUid;
 
@@ -415,7 +415,7 @@ class UnifiedAuthService {
 
       bool trackingStatus = await _trackingApi.isTracking() ?? false;
       if (!trackingStatus) {
-        await _trackingApi.setDisableTracking(value: false);
+        await _trackingApi.startManualTracking();
         print("Tracking enabled");
       } else {
         print(trackingStatus);
