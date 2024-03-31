@@ -50,7 +50,7 @@ class RoleSelectionScreen extends StatelessWidget {
                       ),
                     ),
                     child: const Text(
-                      'PHYSICIAN PORTAL',
+                      'Physician Portal',
                       style: TextStyle(
                         fontSize: 30.0,
                         color: Colors.white,
@@ -72,7 +72,7 @@ class RoleSelectionScreen extends StatelessWidget {
                       ),
                     ),
                     child: const Text(
-                      'PATIENT PORTAL',
+                      'Patient Portal',
                       style: TextStyle(
                         fontSize: 30.0,
                         color: Colors.white,

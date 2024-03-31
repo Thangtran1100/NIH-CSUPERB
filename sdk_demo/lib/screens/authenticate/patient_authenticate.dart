@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sdk_demo/screens/authenticate/patient_register.dart';
 import 'package:sdk_demo/screens/authenticate/patient_sign_in.dart';
-import 'package:sdk_demo/screens/physician/physician_home.dart';
+import 'package:sdk_demo/screens/patient/patient_home.dart';
 import 'package:sdk_demo/services/UnifiedAuthService.dart';
 import 'package:sdk_demo/models/user.dart';
 
@@ -24,11 +24,11 @@ class _PatientAuthenticateState extends State<PatientAuthenticate> {
   void onAuthenticated(AppUser user) async {
     String role = await _authService.checkUserRole(user.uid!);
     if (role == 'Patient') {
-      // If the user is a physician, navigate to the PhysicianHome
+      // If the user is a patient, navigate to the PatientHome
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const PhysicianHome()),
+          MaterialPageRoute(builder: (context) => const Home()),
         );
       }
     } else {
