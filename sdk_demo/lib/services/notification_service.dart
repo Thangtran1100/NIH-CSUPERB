@@ -1,37 +1,38 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:ui';
+
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 class NotificationService {
-  final FlutterLocalNotificationsPlugin notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
-  Future<void> initNotification() async {
-    AndroidInitializationSettings initializationSettingsAndroid =
-        const AndroidInitializationSettings('flutter_logo');
-
-    var initializationSettingsIOS = DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-        onDidReceiveLocalNotification:
-            (int id, String? title, String? body, String? payload) async {});
-
-    var initializationSettings = InitializationSettings(
-        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    await notificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse:
-            (NotificationResponse notificationResponse) async {});
+  // Initialize the notification service
+  static Future<void> init() async {
+    await AwesomeNotifications().initialize(
+      'resource://drawable/res_app_icon',
+      [
+        NotificationChannel(
+          channelKey: 'basic_channel',
+          channelName: 'Basic Notifications',
+          channelDescription: 'Notification channel for basic tests',
+          defaultColor: const Color(0xFF9D50DD),
+          importance: NotificationImportance.High,
+          channelShowBadge: true,
+        ),
+      ],
+    );
   }
 
-  notificationDetails() {
-    return const NotificationDetails(
-        android: AndroidNotificationDetails('channelId', 'channelName',
-            importance: Importance.max),
-        iOS: DarwinNotificationDetails());
-  }
-
-  Future showNotification(
-      {int id = 0, String? title, String? body, String? payLoad}) async {
-    return notificationsPlugin.show(
-        id, title, body, await notificationDetails());
+  static Future<void> showEndTripNotification({
+    required String title,
+    required String body,
+    required String payload,
+  }) async {
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+        channelKey: 'basic_channel',
+        title: title,
+        body: body,
+        payload: {'payload': payload},
+      ),
+    );
   }
 }

@@ -32,7 +32,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    notificationService.initNotification();
+    NotificationService.init();
     startListeningLocation();
   }
 
@@ -71,20 +71,19 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
             print("Trip ended");
 
             if (_isAppInForeground) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _showEndOfTripDialog(context);
-      }
-    });
-  } else {
-    // Push a local notification as the app is not in the foreground
-    notificationService.showNotification(
-      id: 0,
-      title: 'Trip Completed',
-      body: 'Were you the driver for this trip?',
-      payLoad: 'tripEnded',
-    );
-  }
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (mounted) {
+      _showEndOfTripDialog(context);
+    }
+  });
+} else {
+  NotificationService.showEndTripNotification(
+    title: 'Trip Completed',
+    body: 'Were you the driver for this trip?',
+    payload: 'tripEnded',
+  );
+}
+
           });
         }
       } else if (_isTripOngoing) {
