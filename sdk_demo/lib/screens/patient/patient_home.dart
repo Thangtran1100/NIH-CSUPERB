@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sdk_demo/screens/patient/patient_settings.dart';
@@ -18,7 +19,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
   Timer? _inactivityTimer;
   bool _isTripOngoing = false;
   String _speedInfo = "Waiting for trip to start...";
-  final double notMovingSpeedThreshold = 0.5; // meters per second
+  final double notMovingSpeedThreshold = 2.2352; // meters per second
   final int inactivityTimeout = 60; // seconds
 
   final List<String> titles = ['Home Page', 'Settings'];
@@ -31,8 +32,15 @@ class HomeState extends State<Home> with WidgetsBindingObserver{
   @override
   void initState() {
     super.initState();
+    AwesomeNotifications().setListeners(
+        onActionReceivedMethod: NotificationService.onActionReceivedMethod,
+        onNotificationCreatedMethod:
+            NotificationService.onNotificationCreatedMethod,
+        onNotificationDisplayedMethod:
+            NotificationService.onNotificationDisplayedMethod,
+        onDismissActionReceivedMethod:
+            NotificationService.onDismissActionReceivedMethod);
     WidgetsBinding.instance.addObserver(this);
-    NotificationService.init();
     startListeningLocation();
   }
 
@@ -79,8 +87,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
 } else {
   NotificationService.showEndTripNotification(
     title: 'Trip Completed',
-    body: 'Were you the driver for this trip?',
-    payload: 'tripEnded',
+    body: 'Were you the driver for this trip?'
   );
 }
 
